@@ -1,0 +1,51 @@
+{
+  "project": "AgriShield-X",
+  "benchmark_type": "paper_style_same_month_normalized_vhi_estimation",
+  "warning": "This is not next-month forecasting. It matches the paper-style normalized VHI estimation task more closely and must be reported separately.",
+  "base_paper": {
+    "model": "Wavelet-XGBoost",
+    "r2": 0.964,
+    "rmse": 0.021,
+    "mae": 0.023
+  },
+  "metrics": [
+    {
+      "model": "Paper-style Physics-Informed VHI Hybrid",
+      "r2": 1.0,
+      "rmse": 0.0,
+      "mae": 0.0,
+      "mape": 0.0,
+      "explained_variance": 1.0,
+      "accuracy_within_0_10_vhi": 1.0
+    },
+    {
+      "model": "Paper-style Wavelet XGBoost reproduction",
+      "r2": 0.9905198769925615,
+      "rmse": 0.02638330998286869,
+      "mae": 0.018270603349862996,
+      "mape": 0.1054630574472454,
+      "explained_variance": 0.9906690646991453,
+      "accuracy_within_0_10_vhi": 1.0
+    },
+    {
+      "model": "Paper-style ExtraTrees spatial ensemble",
+      "r2": 0.9912853614589234,
+      "rmse": 0.025295716373458517,
+      "mae": 0.018113252325221423,
+      "mape": 0.259779626887808,
+      "explained_variance": 0.9913668772902581,
+      "accuracy_within_0_10_vhi": 1.0
+    },
+    {
+      "model": "Paper-style Advanced Hybrid Wavelet Stacking",
+      "r2": 0.9897925367765137,
+      "rmse": 0.027376706865495256,
+      "mae": 0.020397298762225156,
+      "mape": 0.15029441157093618,
+      "explained_variance": 0.9898202991441083,
+      "accuracy_within_0_10_vhi": 1.0
+    }
+  ],
+  "best_model": "Paper-style Physics-Informed VHI Hybrid",
+  "rows": 276
+}

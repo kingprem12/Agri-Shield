@@ -1,0 +1,1647 @@
+Agricultural drought forecasting using remote sensing: A hybrid modeling 
+framework by integrating wavelet transformation and machine 
+learning techniques
+Muhammad Zubair
+a , b , 1
+, Zeeshan Zafar
+c , 1
+, Shenjun Yao
+a , b , *
+, Zhongyang Guo
+a , b
+,  
+Adeel Ahmad Nadeem
+c
+, Shah Fahd
+d
+a
+Key Laboratory of Geographic Information Science (Ministry of Education), East China Normal University, Shanghai 200241, China
+b
+School of Geographic Sciences, East China Normal University, Shanghai 200241, China
+c
+State Key Laboratory of Water Resources Engineering and Management, Wuhan University, Wuhan 430072, China
+d
+College of Urban and Environmental Sciences, Northwest University, Xi ’ an 710127, China
+ARTICLE INFO
+Keywords:
+Drought
+Machine learning
+Vegetation health index
+Wavelet decomposition
+Remote sensing
+ABSTRACT
+Climate change has intensified the frequency and severity of droughts, increasingly threatening environmental 
+sustainability by reducing agricultural productivity and placing additional stress on water resources. Although 
+accurate drought forecasting is vital for resource management and disaster mitigation, it remains a formidable 
+challenge because of the intricate and non-stationary characteristics of climatic and ecological processes. This 
+study proposes an innovative hybrid modeling framework that integrates wavelet transform preprocessing with 
+ensemble-based machine learning (ML) models, XGBoost, AdaBoost, and Random Forest, to enhance agricultural 
+drought prediction. The Sindh Province of Pakistan was selected as the case study area. CHIRPS precipitation 
+data and MODIS-derived environmental indicators, including Land Surface Temperature (LST), Normalized 
+Difference Vegetation Index (NDVI), Modified Normalized Difference Water Index (MNDWI), Vegetation Con -
+dition Index (VCI), and Vegetation Health Index (VHI), were introduced into models. Wavelet-based decompo -
+sition was first applied to the time-series data to capture multi-scale patterns and reduce noise. The resulting 
+signals were then used to train the ML models to forecast drought, as represented by the VHI. Results show that 
+wavelet preprocessing significantly improves prediction accuracy. Among the tested models, XGBoost achieved 
+the highest performance (R² = 0.964), followed by AdaBoost (R² = 0.946) and Random Forest (R² = 0.9263). 
+These findings highlight the effectiveness of combining wavelet analysis with ML techniques for drought 
+assessment. The proposed framework offers a robust decision-support tool for identifying drought-prone areas, 
+enhancing agricultural resilience, and informing policy responses to climate-related risks.
+1. Introduction
+Drought, characterized by a deficiency of water resources compared 
+to typical conditions, significantly influences agricultural productivity 
+( Hei ß et al., 2025 ; Kafy et al., 2023 ; Su et al., 2024 ). Drought is a critical 
+factor that adversely affects crop growth, leading to substantial declines 
+in agricultural yields ( Jiang et al., 2025; Wu, 2022 ; X. Zhang et al., 
+2024 ). Severe drought conditions significantly reduce chlorophyll levels 
+and water accessibility in plants, interfering with photosynthesis 
+mechanisms ( Jiang et al., 2023; Li et al., 2025a ; Yue Zhao et al., 2024 ). 
+This disruption accelerates the beginning of agricultural drought and 
+intensifies declines in agricultural productivity ( Cui et al., 2025a; 
+Wright and Kitajima, 2022 ). In the next 30 years, the global population 
+is predicted to surge by over 70 % ( Sadiq et al., 2023a ; B. Wang et al., 
+2024 ; Xi et al., 2024 ), presenting significant challenges in addressing 
+drought severity ( Kang et al., 2024; Smith and Boers, 2023 ). Such in -
+creases in drought severity could intensify food insecurity as countries 
+struggle to meet the demands of their rapidly growing populations 
+( Dunn, 2020; Fang et al., 2024 ; Q. Zhao et al., 2024 ). Droughts can 
+trigger conflicts, forced migration, wildfires, food shortages, and 
+* Correspondence to: School of Geographic Sciences, East China Normal University, 500 Dongchuan Road, Shanghai 200241, China.
+E-mail address: sjyao@geo.ecnu.edu.cn (S. Yao). 
+1
+These authors contributed equally to this work
+Contents lists available at ScienceDirect
+Agricultural Water Management
+journal homepag e: www.el sevier.com/loc ate/agwa t
+https://doi.org/10.1016/j.agwat.2025.109922
+Received 25 May 2025; Received in revised form 11 October 2025; Accepted 20 October 2025  
+Agricultural Water Management 321 (2025) 109922 
+Available online 27 October 2025 
+0378-3774/© 2025 The Author(s). Published by Elsevier B.V. This is an open access article under the CC BY-NC-ND license ( http://creativecommons.org/licenses/by- 
+nc-nd/4.0/ ). 
+
+widespread hunger (Y. Huang et al., 2024 ; W. Xu et al., 2024 ; M. Zhang 
+et al., 2024 ). Recent drought events have become increasingly intense, 
+coinciding with a two-degree Celsius rise in global temperatures during 
+the last five decades ( Bevacqua et al., 2024 ; Y. Wang et al., 2024a ; Wu, 
+2022 ). The escalating frequency of extreme heat events and declining 
+agricultural productivity demand the implementation of advanced 
+monitoring techniques ( Deser, 2020; Lynch, 2022 ).
+Droughts are influenced by several factors, including variations in 
+precipitation, evapotranspiration rates, decreased groundwater flow, 
+and imbalances between water requirements and supply ( Du et al., 
+2024 ; Li, 2022 ; Qingping Liu et al., 2024 ). Meteorological droughts arise 
+from insufficient precipitation, such as inadequate rainfall to sustain soil 
+moisture or excessive rainfall that exceeds the soil’s retention capacity 
+( Luan et al., 2024a; Sadiq et al., 2023b; Xue et al., 2024; Yu et al., 2022 ). 
+Vegetation droughts, on the other hand, occur due to low soil moisture 
+during critical growing seasons ( Haq, 2024 ), driven primarily by 
+elevated temperatures and excessive evapotranspiration ( Guo et al., 
+2023; Haq and Khan, 2022 ; Yue Zhao et al., 2024 ). Vegetation drought is 
+among the most prevalent natural disasters, significantly affecting crop 
+yields and livelihoods ( Jiang, 2020 ; P. Zhang et al., 2024 ). An insuffi -
+cient water supply undermines plant health and productivity, which is 
+influenced by factors such as insufficient precipitation, high tempera -
+tures, and excessive evapotranspiration ( Du et al., 2024 ; Thomas et al., 
+2021 ; Wei et al., 2024 ). However, agricultural drought is also driven by 
+complex internal and external automated mechanisms, including cli -
+matic variations and human intervention ( Bauters, 2022; Eini et al., 
+2024; Manu, 2022; Smith et al., 2023; Vallicrosa, 2023 ).
+Droughts occur frequently in Pakistan, at least three times every ten 
+years ( Javed et al., 2024 ). The country has faced numerous intense 
+drought incidents, mainly affecting the Sindh and Balochistan regions 
+( Ansari et al., 2024; Muzammil et al., 2023; Oh et al., 2023 ). Prolonged 
+droughts from 1999 to 2002 and 2014–2018 reduced crop yields by 
+60–80 %, causing substantial economic losses at both provincial and 
+national levels ( Novoa et al., 2023; Rahman et al., 2024 ). Recent years 
+have seen growing concern regarding the escalating severity and fre -
+quency of droughts in Pakistan, as noted in various other contexts in 
+regions of Asia as well ( Ali, 2018; Ali et al., 2023; Yu et al., 2023 ). The 
+observed increase in heat waves and extreme weather events in Sindh 
+indicates a possible rise in the frequency of droughts ( Alizadeh et al., 
+2024; Wu, 2021 ). Hence, it is crucial to employ effective vegetation 
+drought monitoring techniques, which are vital for assessing drought 
+impacts, developing early warning systems, conducting risk assess -
+ments, and mitigating the adverse effects of drought.
+Satellite remote sensing has grown in importance for evaluating 
+drought because it can detect changes in vegetation health on various 
+scales ( Chanuwan Wijesinghe et al., 2024; Moreno-de-las-Heras et al., 
+2023 ). This helps decision-makers pinpoint drought-prone areas and 
+allocate resources effectively to minimize their effects without relying 
+on ground-based observations. Satellite imagery offers comprehensive 
+insights, enabling the observation of drought conditions with a high 
+spatial accuracy ( Li et al., 2025b; Sadeghi-Jahani et al., 2024; Xi and 
+Yuan, 2023 ). Indices derived from remote sensing, such as the Land 
+Surface Temperature (LST), Vegetation Condition Index (VCI), Tem -
+perature Condition Index (TCI), and Vegetation Health Index (VHI), are 
+primarily utilized to assess the effects of water and thermal stress on 
+plant growth ( de Oliveira et al., 2022 ; Kafy et al., 2023a ; Putzenlechner 
+et al., 2023 ; Y. Wang et al., 2024b ). The VHI relates TCI and VCI to assess 
+the overall condition and production of vegetation ( Cui et al., 2025b; 
+Ding et al., 2024; Hammad and Falchetta, 2022 ). Different research 
+projects evaluated agricultural droughts using Normalized Difference 
+Vegetation Index (NDVI), Modified Normalized Difference Water Index 
+(MNDWI), the sources of surface water classified as Permanent and 
+Temporary Surface Waterbodies (PTSW), and Soil Moisture Content 
+(SMC) ( Adeyeri et al., 2024; Wang et al., 2023; Yang et al., 2024 ; D. 
+Zhang et al., 2024 ; Yuxin Zhao et al., 2024 ; Zhu et al., 2024 ). The VCI, 
+TCI, and VHI are found to be significantly more effective in detecting 
+drought than the NDVI, and can minimize the influence of geographic 
+factors such as weather, soil, vegetation, and topography ( Luan et al., 
+2024b; Weng et al., 2023; Zafar et al., 2025 ).
+Understanding ecosystems and climate dynamics necessitates the 
+utilization of data-driven approaches to generate precise forecasts for 
+the upcoming decades (S. Ali et al., 2022 ; Li et al., 2024 ; Pande et al., 
+2024 ; Zafar et al., 2024b ). This includes the use of cutting-edge tech -
+niques, including deep learning (DL) ( Foroumandi et al., 2023 ) and 
+machine learning (ML) models ( Nourani et al., 2025 ), to predict climate 
+variables and the availability of natural resources, such as vegetation 
+conditions, under different climate change scenarios ( Huang et al., 
+2025 ). A variety of potential models have been developed, including 
+bagging, extreme gradient boosting (XGBoost), random forest (RF), 
+adaptive boosting (AdaBoost), autoregressive integrated moving 
+average (ARIMA) models, artificial neural networks (ANNs), multiple 
+linear regression, K-N neighbors, regression trees, and additional 
+advanced models. These models have demonstrated outstanding effi -
+cacy in predicting climatic variables and various datasets ( Cheng et al., 
+2023, 2025; Karbasi et al., 2023; Xiao et al., 2024 ; L. Xu et al., 2024 ). 
+Yet, selecting the optimal model frequently relies on identifying distinct 
+characteristics and the array of ecological variables being assessed ( He 
+et al., 2023 ). Fortunately, remote sensing datasets provide important 
+time series data for analysis ( Lomeo et al., 2024; Yu et al., 2023; Zhou 
+et al., 2024 ). Although not extensively utilized in machine learning 
+models to date, predicting drought vulnerability through VHI via sat -
+ellite data holds considerable potential for improving our understanding 
+of the effects of climate change and extreme weather events ( Han et al., 
+2024; Zhang et al., 2023 ). Over the past decade, wavelet transformation 
+has gained widespread recognition as a powerful tool for analyzing time 
+series trends, particularly for identifying variations and periodicities in 
+data ( Tao et al., 2024; Zheng et al., 2023 ). This approach offers a 
+comprehensive representation of signals in both time and frequency 
+domains, providing significant insights into the fundamental processes 
+and their underlying structural patterns ( Liu et al., 2025; Wu et al., 
+2024 ). Wavelet methods have been increasingly adopted by researchers 
+for preprocessing time series data inputs, aiming to enhance model 
+performance ( Aon et al., 2024 ). This integration addresses a funda -
+mental limitation of machine learning models in handling 
+non-stationary data effectively ( Guo et al., 2022 ). The initial step in 
+creating wavelet-enhanced machine learning models entails preparing 
+the original dataset through wavelet transformation ( Khan et al., 2020 ). 
+Hybrid models, which combine linear stochastic methods with nonlinear 
+machine learning models, can more accurately predict droughts 
+( Chidepudi et al., 2023 ; X. Liu et al., 2024 ; F. Wang et al., 2024 ).
+The novelty of this study lies in its integrated hybrid framework, 
+which uniquely combines discrete wavelet transformation for multi- 
+resolution analysis of non-stationary remote sensing data with a 
+comparative ensemble of advanced machine learning models, including 
+XGBoost, AdaBoost, and RF. This method systematically decomposes 
+input signals to enhance feature extraction, utilizing wavelet coherence 
+to identify time-frequency relationships among drought indicators, 
+thereby improving predictive accuracy for complex dynamics of vege -
+tation health. This approach differs from methods that rely on single 
+models or raw data. A thorough comparison of various boosted and tree- 
+based models for VHI prediction establishes a strong benchmark for 
+selecting the most effective algorithm for drought forecasting. The study 
+aims to enhance the accuracy of machine learning frameworks for 
+drought assessments and forecasting by evaluating the performance of 
+hybrid models. Furthermore, this research lays the groundwork for 
+identifying key indicators of drought severity and their impact on 
+agricultural productivity, ultimately facilitating the improvement of 
+early warning and drought monitoring systems to enhance the effec -
+tiveness of climate adaptation and mitigation strategies.
+M. Zubair et al.                                                                                                                                                                                                                                 Agricultural Water Management 321 (2025) 109922 
+2 
+
+2. Materials and methods
+2.1. Study area
+Fig. 1 delineates the study area, the Sindh province of Pakistan, 
+which covers approximately 14.1 million hectares, with around 35 % 
+(4.9 million hectares) designated agricultural land ( Qamer et al., 2023; 
+Satiz ´abal-Alarc ´on et al., 2024 ). Sindh contributes about 25 % of the 
+national economy, with the agriculture sector accounting for 17 % 
+( Zafar et al., 2024a ). The region is characterized by the cultivation of 
+several crops, including cereals such as wheat and rice, industrial crops 
+like cotton and sugarcane, fruit crops like mango and guava, and hor -
+ticultural crops like chili, tomato, and sunflower ( Usman et al., 2024 ). 
+The province ’ s agricultural lands utilize the Indus Basin Irrigation Sys -
+tem to cultivate a diverse range of crops. The plains predominantly 
+characterize the region, yet the northern parts of the province reveal a 
+hilly landscape; elevations range from sea level to approximately 
+2100 m. The plains predominantly characterize the region, although the 
+northern parts of the province feature a hilly landscape; elevations range 
+from sea level to approximately 2100 m (W. Ali et al., 2022 ). The climate 
+of Sindh exhibits subtropical traits, characterized by hot summers from 
+May to August and cold winters from December to January. The tem -
+perature ranges from 2 
+◦
+C in winter to 46 
+◦
+C in summer. The typical 
+annual precipitation ranges between 150 and 180 mm, predominantly 
+occurring during the monsoon season, which extends from July to 
+September ( Aeman et al., 2023 ). The region faces a persistent water 
+shortage due to low annual rainfall and high evaporation rates. This 
+situation is aggravated by its position in the lower-riparian zone, which 
+makes it vulnerable to severe droughts during dry periods. Prolonged 
+droughts often lead to excessive irrigation practices, further aggravating 
+waterlogging and soil salinization problems ( Ahmad et al., 2023 ).
+2.2. Datasets description
+We implemented a comprehensive data collection approach 
+employing advanced cloud-based platforms. NDVI, LST, TCI, VCI, VHI, 
+MNWDI, and precipitation were systematically extracted from 2001 to 
+2023 using the Google Earth Engine (GEE). This multi-faceted approach 
+ensures the model captures the complex interplay between the atmo -
+sphere, vegetation, and water. This section will cover the characteristics 
+of the data sets employed in this research.
+NDVI is a metric used to evaluate vegetation growth and health, 
+frequently employed in assessing drought conditions. ( He et al., 2023 ). 
+The data were derived from MOD13Q1, which measures vegetation 
+reflectivity in the near-infrared (NIR) and red wavelengths and is 
+computed using Eq. 1 . 
+NDVI =
+NIR   R
+NIR + R
+……………………… (1) 
+The MNDWI was calculated using the short-wave infrared (SWIR) 
+and green bands of MOD09GA.006 Terra Surface Reflectance features of 
+exposed water resources using Eq. 2 . Furthermore, MNDWI minimizes 
+the impact of built-up area features often linked to open water in other 
+indices (K. Huang et al., 2024 ). 
+MNDWI =
+Green   SWIR
+Green + SWIR
+……………… (2) 
+Estimating LST is crucial for understanding the thermal character -
+istics of the Earth ’ s surface. Calculating monthly averages for the 
+research region using MOD11A1 Terra Land Surface Temperature and 
+Emissivity Daily Global data is one effective technique to anticipate land 
+Fig. 1. Geographical Boundary of the Study Area.
+M. Zubair et al.                                                                                                                                                                                                                                 Agricultural Water Management 321 (2025) 109922 
+3 
+
+surface temperature. This technique utilizes a cloud-based system that 
+facilitates the processing and analysis of remote sensing data.
+The VHI quantifies plant health and is employed to monitor and 
+forecast the impacts of agricultural drought stress. This reflects the 
+adaptive responses of vegetation to stress, serves as an analytical tool for 
+drought-related issues, and guides the formulation of adaptive and 
+mitigation strategies. The distribution of VCI and TCI significantly in -
+fluences the VHI ( Li et al., 2024; Zeng et al., 2022 ). VHI, TCI, and VCI 
+were derived from MODIS using Eqs. 3, 4, and 5 . 
+VHI = ( 0 . 5 × ( VCI + TCI ) ) …………………… (3) 
+VCI =
+NDVI   NDVI
+min
+NDVI
+max
+  NDVI
+min
+…………………… (4) 
+TCI =
+LST
+max
+  LST
+NDVI
+max
+  NDVI
+min
+…………………… (5) 
+where NDVI / LST is the duration and specific pixel value; NDVI
+min 
+/ 
+LST
+min 
+is the lowest NDVI and LST values throughout all pixels; NDVI
+max 
+/ LST
+max 
+is the highest NDVI and LST over all pixels.
+Monthly precipitation data at a high precision of 0.05 
+◦
+(about 5 km) 
+was obtained using CHIRPS (Climate Hazards Group InfraRed Precipi -
+tation with Station data), which runs on the GEE platform ( Jiang et al., 
+2020; Smith et al., 2023; Yu et al., 2022 ).
+The MODIS and CHIRPS datasets were selected for this study due to 
+their extensive and consistent temporal availability, which is crucial for 
+detailed time-series analysis of drought. MODIS provides calibrated, 
+multispectral data necessary for deriving a variety of complementary 
+vegetation and thermal indices (NDVI, LST, MNDWI, VCI, TCI) from a 
+single sensor system, ensuring pixel-level compatibility ( Badarneh et al., 
+2024 ). CHIRPS precipitation data, designed explicitly for drought 
+monitoring, enhances these with high-resolution, station-blended out -
+puts that improve accuracy over satellite-based estimates alone 
+( Rahman et al., 2025 ). Additionally, these datasets are easily integrated 
+into the Google Earth Engine platform, enabling efficient and repro -
+ducible large-scale computations throughout the entire study period 
+(2001 – 2023). To address missing data and outliers in the remote sensing 
+inputs, we applied a combination of temporal interpolation, spatial 
+smoothing, and statistical filtering techniques( Mpakairi et al., 2025 ). 
+Outliers were identified using z-score and IQR thresholds, while missing 
+pixel values were reconstructed using temporal interpolation and spatial 
+averaging. The corrected datasets were validated against independent 
+satellite sources to ensure physical consistency.
+Initially, each calculated dataset time series underwent decomposi -
+tion into low-frequency and high-frequency sub-series by applying the 
+discrete wavelet transform (DWT). These datasets were then used as 
+input data for the XGBoost, Random Forest, and AdaBoost models to 
+forecast drought severity and vegetation health, as represented by VHI. 
+The study process flowchart is explained in Fig. 2 . To assess the model ’ s 
+performance on novel data, the dataset is split into two parts: the 
+training set, which covers 70 % of the total data, and the testing set, 
+which covers 30 % of the data. The split ratio is a standard method in 
+machine learning for time-series forecasting, effectively balancing the 
+need for sufficient training data with the requirement for a statistically 
+sound test set to evaluate model generalizability ( Gupta et al., 2022 ).
+2.3. Discrete wavelet decomposition
+Wavelet analysis has two types: continuous wavelet transformation 
+(CWT) and discrete wavelet transformation (DWT) ( Khan et al., 2020 ). 
+Due to its computational complexity and processing time requirements, 
+the continuous wavelet transformation is not often used for forecasting 
+( Aon et al., 2024 ). DWT-enhanced features produce enhanced input 
+representations for machine learning techniques, such as XGBoost, in 
+drought modeling, resulting in more accurate and dependable pre -
+dictions ( Chidepudi et al., 2023 ). Inverse DWT (IDWT) also enables the 
+reconstruction of the original signal, facilitating the interpretation of 
+results ( Khan et al., 2020 ). Thus, DWT is vital for improving prediction 
+accuracy and drought monitoring. The DWT is expressed with Eq. 6 . 
+ψ
+i , j
+( t ) =
+1
+̅̅̅ ̅
+s
+i
+0
+√ ψ
+{
+t   j τ
+0
+s
+i
+0
+s
+i
+0
+}
+……………………… (6) 
+ψ
+i , j
+( t ) , the mother wavelet, where i and j are integers, regulates the 
+scale and time. The DWT used the Coiflet – 1 (coif1) mother wavelet with 
+a four-level decomposition. This process generated a set of approxima -
+tion coefficients representing the long-term trend, along with four sets of 
+detail coefficients capturing higher-frequency components. For feature 
+analysis and visualization, the trend and the first three detail levels were 
+plotted and later incorporated as additional inputs into the machine 
+learning models to improve drought forecasting accuracy.
+IDWT is utilized to recover VCI, TCI, VHI, NDVI, LST, Precipitation, 
+and MNDWI after executing a Discrete Wavelet Transform (DWT). 
+Initially, we decomposed the original signal, extracted its approximation 
+(low-frequency) and detail (high-frequency) coefficients, and recreated 
+the signal using IDWT to verify the transformation. Root Mean Squared 
+Error (RMSE), R² Score, and visual comparisons of original and recon -
+structed drought indices assess the accuracy of the reconstruction. 
+IDWT-enhanced features are added to machine-learning models upon 
+validation to improve the precision of drought forecasts.
+2.4. Extreme Gradient Boosting (XGBoost)
+XGBoost enhances database computations by refining decision tree 
+algorithms and utilizing automatic parallel processing during training, 
+significantly improving accuracy ( Kafy et al., 2023a ; Zhang et al., 2023 ). 
+The model consists of an ensemble of ’ n ’ decision trees, each concen -
+trating on the residuals of the previous one through a gradient-based 
+algorithm. This iterative approach progressively reduces model re -
+siduals as each tree ’ s predictors are adjusted to minimize these errors 
+further. The true power of XGBoost lies in its ability to transform a 
+collection of weak learners into a robust learner ( Karbasi et al., 2023; 
+Sezen and 
+ˇ
+Sraj, 2024 ). The ultimate forecasting outcome is a synthesis of 
+all weak learners, denoted by ̂y
+i
+; 
+Fig. 2. A Comprehensive Methodological Framework for the Study.
+M. Zubair et al.                                                                                                                                                                                                                                 Agricultural Water Management 321 (2025) 109922 
+4 
+
+̂y
+i
+=
+∑
+K
+k = 1
+f
+k
+( x
+i
+) , f
+k
+∈ F ……………………… (7) 
+where x
+i 
+represents the input features; K denotes the number of decision 
+trees. It is a weak learner, and F denotes the space holding all decision 
+trees. XGBoost integrates regularisation within its model framework to 
+prevent overfitting. The loss function is derived from the following Eq. 8 : 
+L ( φ ) =
+∑
+i
+l ( ̂y
+i
+, y
+i
+) +
+∑
+k
+Ω ( f
+k
+) …………………… (8) 
+where l is the indicator to measure the forecasting error between ̂y
+i 
+and 
+y
+i
+, Ω is the regularization term, which is used to control the complexity 
+and can be expressed as: 
+Ω ( f
+k
+) = α T +
+1
+2
+λ ‖ w ‖
+2
+…………………… (9) 
+where T represents the number of leaf nodes, α and λ are regularization 
+factors responsible for complexity control, and w denotes the score of 
+each leaf.
+The procedure for XGBoost modelling involves several phases. The 
+dataset underwent initial preprocessing, which involved data cleaning, 
+tackling missing values, and removing outliers. As a result, relevant el -
+ements were identified, chosen, and developed to improve the model ’ s 
+performance. We also used data transformation methods like standard -
+ization and normalization. The pre-processed dataset was used to train 
+the XGBoost model, a collection of decision tree models that were 
+underperforming. The model ’ s performance was assessed using relevant 
+statistical metrics on an independent testing dataset post-training ( Haq, 
+2021a, 2021b ). Hyperparameter tuning was performed to enhance the 
+model ’ s performance. ( Pande et al., 2024 ). Ultimately, the most 
+important features were determined by analyzing feature importance.
+XGBoost was explicitly tuned to counter overfitting by constraining 
+model complexity and introducing regularization through a Bayesian 
+search over 100 iterations with 5-fold cross-validation. We limited the 
+complexity of individual trees by testing max_depth [3, 4, 5], ensured 
+slow and conservative learning with learning_rate [0.01, 0.05, 0.1], 
+introduced randomness via row and column sampling with subsample 
+[0.7, 0.8, 0.9] and colsample_bytree [0.7, 0.8], and directly penalized 
+large weights using reg_lambda (L2) [1, 1.5, 2]. The resulting optimal 
+configuration (max_depth = 4, learning_rate = 0.05, subsample = 0.8, 
+colsample_bytree = 0.8, reg_lambda = 1.5) successfully generalized to 
+unseen data.
+2.5. Random Forest
+Random Forest is a sophisticated ensemble-supervised machine 
+learning algorithm that constructs models and produces predictions by 
+adapting the Random Forest algorithm ( Eini et al., 2024; Han et al., 
+2024 ). The process involves constructing numerous decision trees 
+through the bagging technique, utilizing bootstrapped samples. This 
+involves generating random samples from the input data and training 
+decision trees using these samples. The method forecasts by averaging 
+the outputs of separate trees, thereby minimizing overfitting via ma -
+jority voting (Quanshan Liu et al., 2024 ). The algorithm guarantees that 
+decision trees remain uncorrelated by choosing random subsets of fea -
+tures for training. This approach minimizes model variance and im -
+proves prediction accuracy, establishing it as a strong option for 
+regression and prediction tasks ( Faheem et al., 2024 ).
+Bootstrap sampling, also known as bagging, is used when training a 
+model. To train separate trees, this means randomly sampling several 
+subsets of the data with replacements. At each split, every tree selects a 
+random feature subset, generating variation and reducing correlation 
+among the trees. The model runs predictions by combining results using 
+a majority vote for classification tasks and an average for regression 
+tasks once training is finished. Feature importance analysis identifies the 
+most critical predictors using Mean Decrease in Impurity (MDI) among 
+other measures.
+The assessment of model performance includes the use of Mean 
+Squared Error (MSE) and R² Score for regression tasks, along with 
+metrics like accuracy, precision, recall, and F1-score for classification 
+tasks. For the RF model, we directly managed overfitting by tuning 
+parameters that promote "weak" and diverse learners through a ran -
+domized grid search combined with 5-fold cross-validation. We tested 
+various values, including max_depth [10, 15, 20, None] to control tree 
+growth; min_samples_split [2, 5, 10] and min_samples_leaf [1, 2, 4] to 
+prevent nodes from learning from overly small samples; max_features 
+[ ’ sqrt ’ , 0.7, 0.8] to decorrelate the trees; and n_estimators [100, 200, 
+300] to ensure enough learners. The best model, with parameters 
+max_depth = 15, min_samples_split = 5, max_features = 0.7, and 
+n_estimators = 200, showed strong generalization. The ultimate trained 
+model is subsequently employed to predict drought, utilizing environ -
+mental indicators, including VCI, TCI, LST, NDVI, VHI, MNDWI, and 
+precipitation data.
+2.6. Adaptive Boosting
+Adaptive Boosting (AdaBoost) is a robust ensemble learning algo -
+rithm that improves the performance of weak classifiers by sequentially 
+modifying weights based on misclassified samples ( Du et al., 2024 ; 
+Fankhauser et al., 2022 ; L. Xu et al., 2024 ). AdaBoost enhances models ’ 
+precision by integrating several Decision Trees (stumps). At the outset, 
+the model distributes uniform weights across all training samples and 
+trains the initial weak classifier. Following each iteration, misclassified 
+samples are assigned increased weights, enhancing their impact in the 
+subsequent training phase ( Zhang et al., 2023 ). The ensemble under -
+went iterative training, where each weak learner focused on previously 
+misclassified samples and modified the sample weights appropriately. 
+Selecting an appropriate weak learner as the base model is essential for 
+the effectiveness of the ensemble. An assessment was conducted on 
+multiple weak learners to determine their strengths, enabling the se -
+lection of the most suitable algorithm based on the results. Methods such 
+as oversampling, undersampling, or adjusting class weights were uti -
+lized to enhance the model ’ s efficacy in imbalanced data. The outcomes 
+of weak learners were amalgamated by weighted selection ( Pande et al., 
+2024 ). ensemble to prevent overfitting. We carefully tuned the number 
+and contribution of its sequential learners through a comprehensive grid 
+search, thereby mitigating the tendency to overemphasize complex, 
+hard-to-classify samples. This involved optimizing n_estimators [50, 
+100, 200] to determine the optimal number of boosting rounds, lear -
+ning_rate [0.1, 0.5, 1.0] to control the contribution of each learner, and 
+crucially, the max_depth of the base estimator [1, 2, 3] to ensure the use 
+of truly "weak" learners. The final model configuration 
+(n_estimators = 200, learning_rate = 0.1, base_estimator__max_depth = 2) 
+successfully countered the tendency towards overfitting.
+2.7. Model performance
+The R
+2 
+coefficients of determination, MSE, and RMSE are key mea -
+sures for evaluating model performance. These performance metrics 
+enable the assessment of the accuracy and fit quality of the regression 
+models, comparison of the various models, and evaluation of the likely 
+effectiveness of the chosen models.
+R
+2
+, which is also called the coefficient of determination, is a statis -
+tical metric that indicates how well the independent variables in a 
+regression model can explain the dependent variable ’ s variation 
+( Chidepudi et al., 2023; Xiao et al., 2024 ). R
+2 
+can take on values between 
+0 and 1, with 1 being an ideal match. An R
+2 
+number close to 1 shows an 
+extensive association between the estimators and the target variable 
+( Egbueri and Agbasi, 2022 ). In mathematical terms, R
+2 
+is expressed 
+using Eq. 10 : 
+M. Zubair et al.                                                                                                                                                                                                                                 Agricultural Water Management 321 (2025) 109922 
+5 
+
+R
+2
+= 1  
+∑
+n
+i = 1
+( y
+i
+  y
+ʹ
+i
+)
+2
+∑
+n
+i = 1
+( y
+i
+  y
+o
+i
+)
+2
+…………………… (10) 
+where y
+i 
+is the predicted value, y
+ʹ
+i 
+is the observed value, and y
+o
+i 
+is the 
+average value.
+One popular statistic used to test the efficacy of regression models is 
+the Mean Squared Error. The process comprises calculating the mean 
+squared deviation of the values that differ from the expected and actual 
+ones ( Egbueri and Agbasi, 2022 ). Mean Squared Error (MSE) is 
+expressed using the following Eq. 11 . 
+MSE =
+1
+N
+∑
+n
+i = 1
+( y
+i
+  y
+o
+i
+)
+2
+……………… (11) 
+where N is the aggregate number of observations, y
+i 
+is the true value of 
+the target variable, and y
+o
+i 
+is the predicted value by the model.
+One variant of the mean squared error is the root mean square error, 
+abbreviated as RMSE. To find it, take the square root of the sum of all the 
+squares of differences between the actual and anticipated values ( Pande 
+et al., 2024 ). Regression analyses often use RMSE to measure the 
+average size of errors. With 0 being the optimum value, decreasing 
+RMSE values show that the model is performing better ( Egbueri and 
+Agbasi, 2022 ). 
+RMSE =
+̅̅̅̅̅̅̅̅̅ ̅
+MSE
+√
+………………… (12) 
+3. Results
+3.1. Discrete wavelet transform
+This study employed the DWT to conduct a multiresolution analysis 
+of critical drought-related variables, including the TCI, VCI, VHI, LST, 
+NDVI, MNDWI, and precipitation data. The main aim of utilizing DWT 
+was to break down these intricate time series into their fundamental 
+components, facilitating the separation of long-term trends from short- 
+term variations. A three-level decomposition was conducted utilizing 
+the ‘Haar ’ wavelet, which was recognized for its simplicity and effec -
+tiveness in interpreting environmental data characterized by sudden 
+changes. The decomposition yielded an approximation component that 
+signifies the overall trend (low-frequency behavior) and several detail 
+components that encapsulate high-frequency fluctuations and anoma -
+lies. Fig. 3 depicts the DWT decomposition outcomes for all variables 
+examined in the study. Each row in the picture represents an input 
+variable, while the columns illustrate the original time series, the 
+extracted trend (approximation), and the detail coefficients at decom -
+position levels 1, 2, and 3, respectively. The approximation components 
+describe the fundamental trends in temperature, vegetation health, and 
+water indices over the study period, whereas the detail coefficients 
+underscore short-term fluctuations that may relate to seasonal cycles or 
+abnormal occurrences such as droughts or excessive precipitation.
+Table 1 shows the accuracy assessment of DWT decomposition and 
+reconstruction of essential drought-related variables. The results show 
+Fig. 3. Decomposition of drought-related variables using Discrete Wavelet Transform (DWT): TCI, VCI, VHI, LST, NDVI, MNDWI, and Precipitation. Each row 
+represents a variable, while the columns exhibit the original data, the trend (approximation), and three tiers of detail components.
+M. Zubair et al.                                                                                                                                                                                                                                 Agricultural Water Management 321 (2025) 109922 
+6 
+
+increased reconstruction fidelity for all variables with RMSE values 
+ranging from 0.04 to 0.67 and R² values between 0.77 and 0.92. Among 
+the factors, NDVI showed the most astounding rebuilding accuracy, 
+attaining the lowest RMSE of 0.04 and a robust R² value of 0.87, fol -
+lowed by MNDWI (RMSE = 0.05, R² = 0.92), VCI (RMSE = 0.08, R² =
+0.82), and VHI (RMSE = 0.10, R² = 0.88). The results indicate that DWT 
+effectively represents vegetation and moisture indices, often exhibiting 
+smoother temporal patterns. With R² values of 0.81 and 0.77, respec -
+tively, LST and TCI showed outstanding performance. Despite exhibiting 
+the highest RMSE of 0.67, precipitation attained a substantial R² value of 
+0.86, demonstrating that DWT successfully caught its principal patterns 
+despite intrinsic variability and episodic characteristics.
+3.2. Correlation analysis
+The correlation study among the principal drought-related variables 
+uncovers numerous significant correlations that interpret the 
+interactions between vegetation health, climate parameters, and water 
+availability. A robust negative connection was identified between LST 
+and TCI (r = -0.96), signifying that elevated surface temperatures 
+correlate with heightened temperature stress on vegetation, resulting in 
+diminished TCI values LST and the VHI show a strong negative 
+connection (r = -0.90), which emphasizes the harmful effect of rising 
+temperatures on plant health. In contrast, TCI had a robust positive 
+connection with VHI (r = 0.92), indicating that temperature conditions 
+significantly affect overall vegetation vitality. As anticipated, the VCI 
+and the NDVI demonstrated a robust positive association (r = 0.93), 
+given that both indices evaluate vegetation greenness and vigor. NDVI is 
+a fundamental component in VCI calculation. Moreover, VCI and VHI 
+exhibited a robust correlation (r = 0.75), underscoring the intimate 
+connection between vegetation conditions and comprehensive evalua -
+tions of vegetation health. Precipitation exhibited a strong positive 
+connection with the MNDWI (r = 0.74), signifying that heightened 
+rainfall substantially increases surface water availability, as indicated by 
+MNDWI values. The correlation results suggest that temperature-related 
+variables, especially LST and TCI, significantly affect vegetation health 
+in the studied area. Water availability, as evidenced by precipitation and 
+MNDWI, influences vegetation indices. The correlation between pre -
+cipitation and vegetation indices, specifically NDVI (r = 0.28) and VCI 
+(r = 0.11), was relatively poor. The relatively weak correlation may be 
+due to the semi-arid conditions of Sindh, where vegetation growth is 
+influenced by irrigation, soil moisture storage, and temperature-driven 
+evapotranspiration. As monthly data were used, short-term rainfall 
+variations and delayed vegetation responses may not be fully captured, 
+while seasonal effects further influence the observed relationship Fig. 4 .
+Table 1 
+Accuracy assessment of Discrete Wavelet Transform (DWT) decomposition and 
+reconstruction for drought-related variables.
+Variable RMSE R²
+TCI 0.17 0.77
+VCI 0.08 0.82
+VHI 0.10 0.88
+LST 0.49 0.81
+NDVI 0.04 0.87
+MNDWI 0.05 0.92
+precipitation 0.67 0.86
+Fig. 4. Correlation matrix of drought-related variables. The color scale shows how strong and in what direction the correlations are. Red means there ’ s a strong 
+positive correlation, while blue means there ’ s a strong negative correlation.
+M. Zubair et al.                                                                                                                                                                                                                                 Agricultural Water Management 321 (2025) 109922 
+7 
+
+3.3. Machine learning modeling results
+An innovative hybrid modeling framework was employed, inte -
+grating wavelet transforms with machine learning algorithms, including 
+XGBoost, AdaBoost, and Random Forest, to improve the precision and 
+reliability of drought forecasting and assessments. These methodologies 
+are extensively employed to improve the prediction and monitoring of 
+drought by applying diverse remote sensing indices, including NDVI, 
+LST, TCI, VCI, VHI, MNWDI, and precipitation data from 2001 to 2023. 
+The training and testing phases ’ results, specifically regarding R
+2
+, RMSE, 
+and MSE, are presented in Table 2 for the assessed machine learning 
+models. The findings show that each model exhibited adequate predic -
+tive performance for drought monitoring, utilizing VHI as the target 
+variable.
+3.3.1. XGBoost
+The efficiency of the XGBoost model in predicting the VHI was 
+evaluated based on its accuracy in modeling the training and testing 
+datasets. Fig. 5 compares the predicted and absolute VHI values during 
+the testing and training phases. The figure shows high agreement be -
+tween the anticipated and observed values, especially during training, 
+when the predicted values match the actual VHI trend. The model ’ s 
+robustness was apparent throughout the testing phase, exhibiting low 
+deviance in the presence of unseen data. With an RMSE of 0.021 and an 
+MAE of 0.023, the model achieved modest levels of accuracy and 
+showed minimal variation between the predicted and observed values. 
+Table 2 shows that the selected predictors in the XGBoost model 
+explained about 96.4 % of the variation in VHI. The feature importance 
+analysis of the XGBoost model, in conjunction with the assessment of 
+model performance, yielded significant insights regarding the influence 
+of each variable on the prediction of VHI. Fig. 6 illustrates the relative 
+significance of input variables obtained from the XGBoost model. NDVI 
+demonstrated the highest relevance score among all variables, signifying 
+its pivotal involvement in the model ’ s decision-making for drought 
+evaluation. Additional characteristics, including LST, TCI, and VCI, 
+contributed to the model, albeit their influence was negligible.
+3.3.2. Random Forest
+The RF model has demonstrated significant predictive effectiveness 
+in estimating the VHI by employing a range of environmental variables. 
+The combined representation of observed and forecasted VHI values for 
+the testing and training datasets ( Fig. 7 ) presents the model ’ s capability 
+to capture the key patterns and temporal dynamics of VHI accurately. 
+The RF model generated exact predictions during the training phase, 
+with negligible discrepancies noted between the actual and predicted 
+values. Despite minor discrepancies observed throughout the testing 
+phase, the model had a formidable predictive capacity, showcasing its 
+resilience when utilized with novel data. The feature importance results 
+( Fig. 8 ) further elucidate the relative impact of each predictor in 
+determining VHI within the RF model.
+3.3.3. AdaBoost
+Fig. 9 presents the evaluation of the AdaBoost model applied to 
+predict the VHI throughout the training and testing stages. The results 
+effectively demonstrate the precise prediction trend throughout the 
+training phase and the comparatively higher deviation observed during 
+the testing phase. The observed pattern of diminished performance 
+during testing corresponds with the behavior noted in the XGBoost 
+model, suggesting potential overfitting or fluctuations in the charac -
+teristics of the test data. Despite this, the AdaBoost model successfully 
+identified the overall trend of VHI variations throughout both phases. 
+Fig. 10 presents the importance of the feature derived from the AdaBoost 
+model. This emphasizes the significant influence of vegetation and 
+temperature-related indices in drought monitoring by applying Ada -
+Boost modeling.
+3.4. Taylor diagrams for comparative evaluation of ML models
+We used Taylor diagrams to compare the three ML models ’ perfor -
+mance: XGBoost, RF, and AdaBoost ( Fig. 11 ). Fig. 11 -A presents the 
+training performance, while Fig. 11 -B shows the testing accuracy for 
+each model. All models showed high levels of agreement with the 
+observed VHI values during training, with correlation coefficients be -
+tween 0.92 and 0.96 and standard deviations that were very close to the 
+reference observation (STD = 0.15). XGBoost demonstrated the highest 
+level of performance, aligning most closely with the reference point, 
+with AdaBoost and RF models following in effectiveness. During the 
+testing phase, a minor reduction in predictive accuracy was noted across 
+all models. The standard deviations increased marginally, and the cor -
+relation coefficients reduced to 0.78 and 0.84. Despite this decline, 
+XGBoost consistently maintained superior generalization capabilities 
+compared to RF and AdaBoost, as evidenced by its proximity to the ideal 
+point on the Taylor diagram. The clear separation of model perfor -
+mances between training and testing phases highlights the robustness 
+and adaptability of the XGBoost in catching spatio-temporal drought 
+variability in VHI across diverse conditions. These results highlight the 
+potential of ensemble learning algorithms, specifically XGBoost, as a 
+robust and reliable method for predicting and monitoring drought 
+conditions using multi-source satellite-derived variables.
+4. Discussion
+4.1. Overview of key findings and interpretation
+This study thoroughly evaluated the effectiveness of three ensemble 
+machine learning models, XGBoost, AdaBoost and Random Forest (RF), 
+within the framework of satellite-based drought mapping using a variety 
+of remote sensing variables. The amalgamation of vegetative (VCI, 
+NDVI, VHI), meteorological (LST, precipitation), and hydrological 
+(MNDWI) indicators established a thorough modeling framework to 
+elucidate drought dynamics across time. The performance measures, 
+comprising RMSE, MAE, and R² ( Table 2 ), clearly demonstrated the 
+XGBoost model ’ s better efficacy. The model achieves minimal error 
+rates and optimal correlation during training and testing. The RF and 
+AdaBoost models exhibited commendable performance; however, their 
+accuracy slightly declined during the testing phase, indicating possible 
+overfitting tendencies when compared to XGBoost. The research utilized 
+advanced ensemble models (XGBoost, RF, AdaBoost) in conjunction 
+with wavelet-based signal decomposition to enhance the accuracy of 
+drought mapping, which contrasts with traditional methods. The 
+amalgamation of multi-source satellite indicators facilitated enhanced 
+comprehension of droughts ’ intricate and nonlinear dynamics. The 
+comparative analysis using Taylor Diagrams ( Fig. 11 ) provided an 
+advanced graphical evaluation of model accuracy, variability, and cor -
+relation. The training phase diagram ( Fig. 11 -A) revealed that all models 
+closely aligned with the observed VHI standard deviation and correla -
+tion. However, in the testing phase ( Fig. 11 -B), the XGBoost model 
+maintained its proximity to the observed data point, reflecting greater 
+robustness and generalization capacity under unseen conditions. In 
+contrast, RF and AdaBoost exhibited a wider spread, indicating higher 
+errors and variability. The robust performance of XGBoost compared to 
+AdaBoost and RF is a result of its unique algorithmic advantages. Unlike 
+AdaBoost, which adjusts the weights of misclassified samples, XGBoost 
+Table 2 
+Evaluation of the performance of three machine learning models (XGBoost, 
+Random Forest, and AdaBoost) for VHI prediction using RMSE, MAE, and R².
+ML Model RMSE MAE R²
+XGBoost 0.021 0.023 0.964
+RF 0.035 0.027 0.926
+AdaBoost 0.030 0.024 0.946
+M. Zubair et al.                                                                                                                                                                                                                                 Agricultural Water Management 321 (2025) 109922 
+8 
+
+uses a gradient boosting framework to minimize errors directly and in -
+corporates regularization, effectively reducing overfitting on complex, 
+wavelet-enhanced features. Unlike Random Forest ’ s bagging approach, 
+which averages unrelated trees to minimize variance, XGBoost applies a 
+sequential boosting method that builds trees to correct previous re -
+siduals, often achieving a better bias-variance balance for modeling non- 
+linear relationships in drought data. This combination of gradient-based 
+optimization, inherent regularization, and skillful handling of complex 
+data structures makes it the most effective model for this task.
+The outcomes of the present study provide valuable advancements 
+over previous research efforts in the domain of drought assessment and 
+vegetation health prediction. Several recent research studies have 
+focused on machine learning-based drought and environmental 
+parameter prediction. Han et al. (2024) and Pande et al. (2024)
+employed machine learning techniques to predict land surface temper -
+ature based on remote sensing data obtained from Landsat-8. Moham -
+med et al. (2024) investigated the use of machine learning algorithms 
+for predicting short-term drought conditions by using climatic pre -
+dictors across multiple stations in Hungary, Central Europe, over both 
+historical and future climatic periods (1901 – 2100); the research 
+underscores the superior predictive efficacy of the Random Forest 
+model. Recent studies, such as Chidepudi et al. (2023) , Dai et al. (2025) , 
+and Xiao et al. (2024) , integrated a recursive multi-step forecasting 
+strategy with spatial causal networks, demonstrating a clear perfor -
+mance improvement, especially in the short-term forecast period. 
+Another study conducted in the Yangtze River Basin (X. Xu et al.,2024 ) 
+had a high correlation (R
+2 
+> 0.8) between the predicted and reanalysis 
+datasets, suggesting the robustness of the proposed machine learning 
+stacking ensemble approach; the findings of the study validate the ef -
+ficacy of machine learning ensemble models in improving drought 
+prediction precision, especially in agricultural areas. Kafy et al. (2023b)
+in the Barind Tract region of Bangladesh demonstrated the applicability 
+of Landsat-derived indices such as NDVI, MNDWI, TCI, VCI, and VHI for 
+spatiotemporal drought assessment and future projection using Cellular 
+Automata Artificial Neural Network (CA-ANN) models; the approach 
+effectively identified long-term drought trends. Our study expands the 
+methodological framework by incorporating advanced ensemble ma -
+chine learning models, including XGBoost, Random Forest, and Ada -
+Boost to improve the accuracy of drought predictions. Moreover, unlike 
+the Barind Tract study ( Kafy et al., 2023b ), our research incorporated 
+Fig. 5. Comparison of the XGBoost model ’ s predicted and actual VHI values on the testing and training datasets.
+Fig. 6. Feature importance of input variables in the XGBoost model for VHI prediction.
+M. Zubair et al.                                                                                                                                                                                                                                 Agricultural Water Management 321 (2025) 109922 
+9 
+
+wavelet-based signal decomposition (DWT) to handle data variability 
+and improve model robustness, which is relatively underutilized in 
+previous drought studies. While the approach adopted by Rahmati et al.( 
+(2020) is highly robust, their primary focus remained on static drought 
+inventory mapping and risk classification, largely independent of pre -
+cipitation anomalies for specific years. In contrast, our study provides a 
+novel methodological advancement by integrating not only vegetation- 
+and temperature-based drought indices (TCI, VCI, VHI) but also remote 
+sensing-derived variables (NDVI, LST, MNDWI, precipitation) for dy -
+namic agricultural drought prediction over time. Khan et al.(2020)
+introduce a hybrid approach combining DWT, ARIMA, and ANN to 
+predict meteorological droughts, which has significantly enhanced 
+predicting accuracy, attaining R
+2
+-values as high as 0.934. The optimal 
+outcomes in our investigation indicate R
+2
+-values of 0.964 for XGBoost, 
+implying that although hybrid models may improve predictive accuracy, 
+independent machine learning models such as XGBoost can still yield 
+exceptionally dependable results in analogous drought prediction sce -
+narios. Our research enhances prior findings by illustrating the excel -
+lence and adaptability of XGBoost and AdaBoost in managing 
+satellite-derived multi-indicator drought datasets. Thus, it enables 
+more reliable and scalable drought prediction models for 
+climate-resilient agriculture.
+4.2. Computational challenges of integrating wavelet transforms with ML 
+in GEE
+Implementing the proposed hybrid wavelet – ML framework revealed 
+several computational challenges when combining advanced modeling 
+techniques with the GEE platform. While GEE offers unparalleled access 
+to large-scale satellite archives and efficient preprocessing of remote 
+sensing data, its JavaScript-based environment and client-side process -
+ing structure impose constraints on performing recursive, in-memory 
+calculations required by DWT and ensemble algorithms such as 
+XGBoost and AdaBoost. These operations demand iterative computation 
+and substantial memory resources, which are not natively optimized 
+within GEE.
+Consequently, the workflow of this study adopted a two-stage 
+configuration. Remote sensing indices (LST, NDVI, VCI, TCI, VHI, and 
+MNDWI) together with precipitation data were first extracted and pre -
+processed in GEE, after which DWT decomposition, feature engineering, 
+model training, hyperparameter tuning, and drought forecasting were 
+carried out externally in a Python environment. This hybrid setup 
+Fig. 7. Comparison of the Random Forest model ’ s predicted and actual VHI values on the testing and training datasets.
+Fig. 8. Feature importance of input variables in the Random Forest model for VHI prediction.
+M. Zubair et al.                                                                                                                                                                                                                                 Agricultural Water Management 321 (2025) 109922 
+10 
+
+successfully leveraged the complementary strengths of cloud-based data 
+processing and high-performance local computing. However, it also 
+introduced greater data transfer requirements and workflow coordina -
+tion complexity. These experiences underscore a broader limitation of 
+current geospatial analytics platforms: while cloud environments excel 
+in large-scale data management, they remain less optimized for 
+computationally intensive modeling tasks that require iterative optimi -
+zation or parallel processing.
+Addressing these computational bottlenecks will be an important 
+direction for future research and operational implementation. Im -
+provements in API integration, parallel computing, and cloud-based task 
+scheduling may enhance the scalability and efficiency of wavelet – ML 
+frameworks, facilitating their broader application in environmental 
+monitoring and early-warning systems.
+4.3. Practical barriers to real-time implementation
+In practice, the transition of this framework from experimental 
+modeling to operational real-time drought monitoring remains chal -
+lenging. The first barrier lies in data latency: MODIS-derived indicators 
+typically have a delay of one to two days, while CHIRPS precipitation 
+data may lag by up to three weeks, restricting immediate updates. 
+Second, the workflow ’ s reliance on both cloud-based processing and 
+local Python environments complicates automation, especially for 
+agencies with limited computational infrastructure. Network bandwidth 
+and storage constraints can also hinder the frequent reprocessing of 
+large spatiotemporal datasets required for real-time systems. Moreover, 
+model retraining is necessary to maintain accuracy under changing 
+climatic conditions, further increasing computational costs and opera -
+tional complexity. Consequently, the framework currently supports 
+near-real-time rather than fully real-time drought forecasting.
+4.4. Practical implications and policy recommendations
+The results of this study provide practical insights for enhancing 
+drought resilience and improving resource management. The 
+Fig. 9. Comparison of the AdaBoost model ’ s predicted and actual VHI values on the testing and training datasets.
+Fig. 10. Feature importance of input variables in the AdaBoost model for VHI prediction.
+M. Zubair et al.                                                                                                                                                                                                                                 Agricultural Water Management 321 (2025) 109922 
+11 
+integration of wavelet-enhanced machine learning models, particularly 
+XGBoost, into regional drought monitoring systems enables early iden -
+tification of vegetation stress and water scarcity. Governments and 
+agricultural agencies in drought-prone regions could adopt this frame -
+work to generate high-resolution drought forecasts, providing farmers 
+with timely alerts for adaptive strategies such as optimized irrigation, 
+crop diversification, and the adoption of drought-resistant crops. 
+Leveraging cloud-based platforms like Google Earth Engine further en -
+hances scalability and cost-effectiveness, supporting near-real-time 
+monitoring across large agricultural regions.
+This study underscores the importance of integrating advanced 
+remote sensing and machine learning technologies into national climate 
+adaptation strategies. Policymakers may consider incorporating these 
+models into existing early warning systems to optimize resource allo -
+cation, such as prioritizing water supply to critical agricultural zones or 
+funding infrastructure projects in vulnerable areas. The strong negative 
+correlation observed between increasing LST and decreasing VHI 
+(r =   0.90) emphasizes the urgency of implementing measures that 
+mitigate heat stress, including reforestation, sustainable land manage -
+ment, and heat-resilient urban planning. Moreover, strengthening digi -
+tal infrastructure and capacity-building programs for local stakeholders 
+is essential to address computational and implementation challenges. 
+International collaboration could further enhance the standardization 
+and scalability of this framework by promoting data-sharing initiatives 
+and coordinated climate resilience programs. Incorporating these tech -
+nologies into policy frameworks can help improve food security, reduce 
+economic losses, and strengthen adaptive capacity against intensifying 
+climate risks.
+To facilitate operationalization, an alert system could be developed 
+to translate drought forecasts into actionable guidance. For example, 
+automated notifications could recommend reducing irrigation by 
+20 – 30 %, switching to drip irrigation where possible, or planting 
+drought-resistant crops in subsequent seasons. For researchers and 
+agencies, a three-step workflow could be employed to enable imple -
+mentation: (1) automating data extraction using the GEE Python API, (2) 
+deploying trained models as cloud-based APIs for real-time predictions, 
+and (3) integrating forecast outputs into existing farmer communication 
+channels (e.g., SMS alerts or agricultural mobile applications) with 
+clear, localized recommendations.
+4.5. Limitations and future work
+Although the results are encouraging, this study faces several tech -
+nical limitations. MODIS and CHIRPS datasets were selected because 
+they provide long-term, consistent, and globally available observations, 
+which are essential for drought analysis at regional and temporal scales. 
+However, their moderate spatial and temporal resolutions may constrain 
+fine-scale assessments and introduce uncertainties in areas lacking dense 
+ground validation. Future studies could improve local-level accuracy by 
+incorporating higher-resolution data from the Landsat or Sentinel sat -
+ellite constellations, thereby enabling more detailed drought charac -
+terization and supporting precision agriculture applications.
+While ensemble methods inherently mitigate overfitting through 
+regularization and model averaging, the high R² values observed in this 
+study warrant further verification of model generalization. Future work 
+should test the framework on independent datasets and under varying 
+climatic conditions to ensure robustness and to assess the transferability 
+of model parameters beyond the Sindh region.
+This study employed the VHI as the target indicator because of its 
+direct relevance to agricultural drought, as it integrates information on 
+vegetation vigor and thermal stress. However, relying solely on VHI 
+presents certain limitations. The index mainly reflects vegetation re -
+sponses to water and heat stress, while other factors such as land man -
+agement practices, crop types, and phenological variations can also 
+influence vegetation conditions. Furthermore, the study focused pri -
+marily on agricultural drought impacts and did not include meteoro -
+logical indices such as the Standardized Precipitation Index (SPI) or the 
+Standardized Precipitation Evapotranspiration Index (SPEI), nor direct 
+measurements of root-zone soil moisture, which is a key determinant of 
+plant water availability. This methodological choice was made to 
+maintain consistency in using high-frequency, satellite-derived land 
+surface data. Future research could address this limitation by integrating 
+multiple drought indicators that combine meteorological indices (SPI or 
+SPEI), agricultural drought responses (VHI), and soil moisture data to 
+Fig. 11. Taylor diagrams illustrate the comparative performance of XGBoost, Random Forest, and AdaBoost models in predicting VHI. (A) Training phase results; (B) 
+Testing phase results.
+M. Zubair et al.                                                                                                                                                                                                                                 Agricultural Water Management 321 (2025) 109922 
+12 
+establish a multi-scale forecasting system capable of monitoring the full 
+drought evolution process.
+The models in this study were trained exclusively on data from Sindh 
+Province, Pakistan. Although the specific model parameters and feature 
+importance may vary across regions, the hybrid wavelet – machine 
+learning framework itself is inherently transferable because it relies on 
+remotely sensed indicators that are globally available and comparable 
+across different climatic zones. Therefore, the overall methodology can 
+be adapted to other regions with appropriate calibration. Application to 
+areas with distinct climatic or physiographic characteristics would, 
+however, require retraining and parameter adjustment to account for 
+local variability and ensure model reliability.
+In addition, this study employed ensemble-based machine learning 
+models, including XGBoost, AdaBoost, and Random Forest, for drought 
+prediction. Ensemble learning algorithms were selected because they 
+effectively handle non-linear relationships, perform well with limited 
+samples, and provide interpretable feature importance, which are ad -
+vantageous when dealing with multi-source environmental variables 
+such as precipitation, LST, and vegetation indices. Deep learning models 
+such as Convolutional Neural Networks (CNNs) and Long Short-Term 
+Memory (LSTM) networks can capture complex spatial and temporal 
+dependencies more effectively, but they typically require large training 
+datasets, extensive parameter tuning, and higher computational re -
+sources, which may not be ideal for regional-scale studies with moderate 
+data volume.
+Future research could further evaluate the framework ’ s adaptability 
+by testing it in diverse agro-climatic environments and comparing its 
+performance with advanced deep learning architectures, including 
+CNNs and LSTMs, or hybrid approaches that combine the strengths of 
+both machine learning and deep learning. Such efforts would enhance 
+understanding of model transferability, improve predictive accuracy, 
+and contribute to more robust, data-driven drought early warning sys -
+tems across different climatic contexts.
+5. Conclusion
+This study develops a robust framework for drought prediction by 
+fusing advanced machine learning with wavelet transform preprocess -
+ing, utilizing several critical remote sensing indices, including VHI, 
+NDVI, LST, TCI, VCI, MNWDI, and precipitation. The explicit integration 
+of the DWT for time-series decomposition proved to be a critical step, 
+markedly enhancing the models ’ ability to capture the complex, non- 
+linear, and non-stationary patterns characteristic of drought phenom -
+ena. Among the evaluated models, XGBoost achieved the highest pre -
+dictive accuracy with an R² of 0.964, an RMSE of 0.031, and an MAE of 
+0.023, outperforming both Random Forest and AdaBoost. Further 
+analysis of variable interactions revealed significant correlations that 
+interpret the interplay between climate and vegetation. A notable strong 
+negative correlation was identified between LST and the TCI 
+(r = – 0.96), indicating that rising surface temperatures intensify ther -
+mal stress on vegetation. Similarly, a robust negative correlation be -
+tween LST and the VHI (r = -0.90) highlights the negative impact of 
+increased temperatures on overall plant health. These findings confirm 
+that the models effectively capture critical environmental dynamics. The 
+results provide significant new insights for thorough drought moni -
+toring, offering practitioners and policymakers essential tools to 
+pinpoint vulnerable areas, enhance water management strategies, and 
+inform climate change adaptation policies. By enabling more accurate 
+forecasting of future drought conditions, this approach helps with pro -
+active decision-making to reduce severe social, economic, and envi -
+ronmental impacts, thereby supporting a more resilient agricultural 
+sector and improving drought preparedness in an evolving world.
+CRediT authorship contribution statement
+Zeeshan Zafar: Writing – original draft, Methodology, Investigation, 
+Formal analysis, Data curation, Conceptualization. Muhammad 
+Zubair: Writing – original draft, Methodology, Investigation, Formal 
+analysis, Data curation, Conceptualization. Zhongyang Guo: Valida -
+tion, Supervision, Project administration, Methodology. Shenjun Yao: 
+Writing – review & editing, Validation, Supervision, Project adminis -
+tration, Methodology, Funding acquisition, Conceptualization. Shah 
+Fahd: Investigation, Data curation. Adeel Ahmad Nadeem: Investiga -
+tion, Formal analysis.
+Declaration of Competing Interest
+The authors declare that they have no known competing financial 
+interests or personal relationships that could have appeared to influence 
+the work reported in this paper.
+Acknowledgments
+This research was funded by the National Natural Science Founda -
+tion of China (grant number W2412140).
+Data availability
+Data will be made available on request.
+References
+Adeyeri, O.E., Zhou, W., Ndehedehe, C.E., Wang, X., 2024. Global vegetation, moisture, 
+thermal and climate interactions intensify compound extreme events. Sci. Total 
+Environ. 912, 169261. https://doi.org/10.1016/j.scitotenv.2023.169261 .
+Aeman, H., Shu, H., Abbas, S., Aisha, H., Usman, M., 2023. Sinking delta: quantifying the 
+impacts of saltwater intrusion in the Indus delta of Pakistan. Sci. Total Environ. 880, 
+163356. https://doi.org/10.1016/j.scitotenv.2023.163356 .
+Ahmad, S., Jia, H., Ashraf, A., Yin, D., Chen, Z., Xu, C., Chenyang, W., Jia, Q., 
+Xiaoyue, Z., Israr, M., Ahmed, R., 2023. Water resources and their management in 
+Pakistan: a critical analysis on challenges and implications. WaterEnergy Nexus 6, 
+137 – 150. https://doi.org/10.1016/j.wen.2023.10.001 .
+Ali, G., 2018. Climate change and associated spatial heterogeneity of Pakistan: empirical 
+evidence using multidisciplinary approach. Sci. Total Environ. 634, 95 – 108. https:// 
+doi.org/10.1016/j.scitotenv.2018.03.170 .
+Ali, S., Kim, B.-H., Akhtar, T., Kam, J., 2023. Past and future changes toward earlier 
+timing of streamflow over Pakistan from bias-corrected regional climate projections 
+(1962 – 2099). J. Hydrol. (Amst. ) 617, 128959. https://doi.org/10.1016/j. 
+jhydrol.2022.128959 .
+Ali, S., Liu, D., Fu, Q., Cheema, M.J.M., Pal, S.C., Arshad, A., Pham, Q.B., Zhang, L., 
+2022. Constructing high-resolution groundwater drought at spatio-temporal scale 
+using GRACE satellite data based on machine learning in the Indus Basin. J. Hydrol. 
+(Amst. ) 612, 128295. https://doi.org/10.1016/j.jhydrol.2022.128295 .
+Ali, W., Zhang, H., Mao, K., Shafeeque, M., Aslam, M.W., Yang, X., Zhong, L., Feng, X., 
+Podgorski, J., 2022. Chromium contamination in paddy soil-rice systems and 
+associated human health risks in Pakistan. Sci. Total Environ. 826, 153910. https:// 
+doi.org/10.1016/j.scitotenv.2022.153910 .
+Alizadeh, M.R., Adamowski, J., Inam, A., 2024. Scenario analysis of local storylines to 
+represent uncertainty in complex human-water systems. J. Hydrol. (Amst. ) 635, 
+131186. https://doi.org/10.1016/j.jhydrol.2024.131186 .
+Ansari, R., Liaqat, M.U., Grossi, G., 2024. Improving flood and drought management in 
+transboundary upper jhelum Basin-South Asia. Sci. Total Environ. 945, 174044. 
+https://doi.org/10.1016/j.scitotenv.2024.174044 .
+Aon, S., Nandi, S., Sen, S., Biswas, S., 2024. GRACE based groundwater drought 
+evaluation of ganga basin and analysis of drought propagation using wavelet based 
+quantitative approach. Sci. Total Environ. 951, 175666. https://doi.org/10.1016/j. 
+scitotenv.2024.175666 .
+Badarneh, O., Hazaymeh, K., Almagbile, A., Shogoor, S.Al, 2024. Remote sensing-based 
+agricultural drought mapping in Northern Jordan using landsat and MODIS data. 
+Environ. Adv. 18, 100602. https://doi.org/10.1016/j.envadv.2024.100602 .
+Bauters, M., 2022. Increasing calcium scarcity along afrotropical forest succession. Nat. 
+Ecol. Evol. 6 .
+Bevacqua, E., Rakovec, O., Schumacher, D.L., Kumar, R., Thober, S., Samaniego, L., 
+Seneviratne, S.I., Zscheischler, J., 2024. Direct and lagged climate change effects 
+intensified the 2022 european drought. Nat. Geosci. 17, 1100 – 1107. https://doi.org/ 
+10.1038/s41561 – 024-01559 – 2 .
+Chanuwan Wijesinghe, D., Chaminda Withanage, N., Kumar Mishra, P., Ranagalage, M., 
+Abdelrahman, K., Fnais, M.S., 2024. An application of the remote sensing derived 
+indices for drought monitoring in a dry zone district, in tropical island. Ecol. Indic. 
+167, 112681. https://doi.org/10.1016/j.ecolind.2024.112681 .
+Cheng, M., Sun, C., Nie, C., Liu, S., Yu, X., Bai, Y., Liu, Yadong, Meng, L., Jia, X., 
+Liu, Yuan, Zhou, L., Nan, F., Cui, T., Jin, X., 2023. Evaluation of UAV-based drought 
+indices for crop water conditions monitoring: a case study of summer maize. Agric. 
+Water Manag 287, 108442. https://doi.org/10.1016/j.agwat.2023.108442 .
+M. Zubair et al.                                                                                                                                                                                                                                 Agricultural Water Management 321 (2025) 109922 
+13 
+
+Cheng, S., Wang, W., Chen, Z., 2025. Blending gauge, multi-satellite and atmospheric 
+reanalysis precipitation products to facilitate drought monitoring. J. Hydrol. (Amst. ) 
+647, 132254. https://doi.org/10.1016/j.jhydrol.2024.132254.
+Chidepudi, S.K.R., Massei, N., Jardani, A., Henriot, A., Allier, D., Baulon, L., 2023. 
+A wavelet-assisted deep learning approach for simulating groundwater levels 
+affected by low-frequency variability. Sci. Total Environ. 865, 161035. https://doi. 
+org/10.1016/j.scitotenv.2022.161035.
+Cui, S., Gao, J., Sun, F., Li, G., Che, Y., 2025b. Comparison of vegetation responses to 
+diverse water sources in the Yangtze river basin: insights from meteorological, 
+hydrological, and agricultural drought. Ecol. Indic. 175, 113524. https://doi.org/ 
+10.1016/j.ecolind.2025.113524.
+Cui, S., Gao, J., Sun, F., Li, G., Che, Y., 2025a. Comparison of vegetation responses to 
+diverse water sources in the Yangtze river basin: insights from meteorological, 
+hydrological, and agricultural drought. Ecol. Indic. 175, 113524. https://doi.org/ 
+10.1016/j.ecolind.2025.113524.
+Dai, H., Xiong, L., Ma, Q., Duan, Z., 2025. Deep learning model for drought prediction 
+based on large-scale spatial causal network in the Yangtze river basin. J. Hydrol. 
+654, 132808. https://doi.org/10.1016/j.jhydrol.2025.132808.
+Deser, C., 2020. Insights from earth system model initial-condition large ensembles and 
+future prospects. Nat. Clim. Change 10. https://doi.org/10.1038/s41558–020- 
+0731–2.
+Ding, Y., Zhang, L., He, Y., Cao, S., Gusev, A., Guo, Y., Ran, L., Wei, X., Mikalai, F., 2024. 
+Nonlinear effects of agricultural drought on vegetation productivity in the Yellow 
+River basin, China. Sci. Total Environ. 948, 174903. https://doi.org/10.1016/j. 
+scitotenv.2024.174903.
+Du, C., Pei, J., Feng, Z., 2024. Unraveling the complex interactions between ozone 
+pollution and agricultural productivity in China’s main winter wheat region using an 
+interpretable machine learning framework. Sci. Total Environ. 954, 176293. https:// 
+doi.org/10.1016/j.scitotenv.2024.176293.
+Dunn, R.J.H., 2020. Development of an updated global land in situ-based data set of 
+temperature and precipitation extremes: HadEX3. J. Geophys. Res. Atmos. 125. 
+https://doi.org/10.1029/2019JD032263.
+Egbueri, J.C., Agbasi, J.C., 2022. Performances of MLR, RBF-NN, and MLP-NN in the 
+evaluation and prediction of water resources quality for irrigation purposes under 
+two modeling scenarios. Geocarto Int. 37, 14399–14431. https://doi.org/10.1080/ 
+10106049.2022.2087758.
+Eini, M.R., Najminejad, F., Piniewski, M., 2024. Corrigendum to “Direct and indirect 
+simulating and projecting hydrological drought using a supervised machine learning 
+method” [Sci. Total Environ. 898 (2023), 165523]. Sci. Total Environ. 930, 172842. 
+https://doi.org/10.1016/j.scitotenv.2024.172842.
+Faheem, Z., Kazmi, J.H., Shaikh, S., Arshad, S., Noreena, Mohammed, S., 2024. Random 
+forest-based analysis of land cover/land use LCLU dynamics associated with 
+meteorological droughts in the desert ecosystem of Pakistan. Ecol. Indic. 159, 
+111670. https://doi.org/10.1016/j.ecolind.2024.111670.
+Fang, L., Yin, J., Wang, Yun, Xu, J., Wang, Yongqiang, Wu, G., Zeng, Z., Zhang, X., 
+Zhang, J., Meshyk, A., 2024. Machine learning and copula-based analysis of past 
+changes in global droughts and socioeconomic exposures. J. Hydrol. 628, 130536. 
+https://doi.org/10.1016/j.jhydrol.2023.130536.
+Fankhauser, K., Macharia, D., Coyle, J., Kathuni, S., McNally, A., Slinski, K., Thomas, E., 
+2022. Estimating groundwater use and demand in arid Kenya through assimilation 
+of satellite data and in-situ sensors with machine learning toward drought early 
+action. Sci. Total Environ. 831, 154453. https://doi.org/10.1016/j. 
+scitotenv.2022.154453.
+Foroumandi, E., Nourani, V., Jeanne Huang, J., Moradkhani, H., 2023. Drought 
+monitoring by downscaling GRACE-derived terrestrial water storage anomalies: a 
+deep learning approach. J. Hydrol. (Amst. ) 616, 128838. https://doi.org/10.1016/j. 
+jhydrol.2022.128838.
+Guo, W., He, N., Ban, X., Wang, H., 2022. Multi-scale variability of hydrothermal regime 
+based on wavelet analysis - the middle reaches of the Yangtze river, China. Sci. Total 
+Environ. 841, 156598. https://doi.org/10.1016/j.scitotenv.2022.156598.
+Guo, W., Huang, S., Huang, Q., She, D., Shi, H., Leng, G., Li, J., Cheng, L., Gao, Y., 
+Peng, J., 2023. Precipitation and vegetation transpiration variations dominate the 
+dynamics of agricultural drought characteristics in China. Sci. Total Environ. 898, 
+165480. https://doi.org/10.1016/j.scitotenv.2023.165480.
+Gupta, S., Saluja, K., Goyal, A., Vajpayee, A., Tiwari, V., 2022. Comparing the 
+performance of machine learning algorithms using estimated accuracy. Meas. Sens. 
+24, 100432. https://doi.org/10.1016/j.measen.2022.100432.
+Hammad, A.T., Falchetta, G., 2022. Probabilistic forecasting of remotely sensed cropland 
+vegetation health and its relevance for food security. Sci. Total Environ. 838, 
+156157. https://doi.org/10.1016/j.scitotenv.2022.156157.
+Han, H., Abitew, T.A., Bazrkar, H., Park, S., Jeong, J., 2024. Integrating machine 
+learning for enhanced wildfire severity prediction: a study in the upper Colorado 
+river basin. Sci. Total Environ. 952, 175914. https://doi.org/10.1016/j. 
+scitotenv.2024.175914.
+Haq, M.A., 2021b. CDLSTM: a novel model for climate change forecasting. Comput. 
+Mater. Contin. 71, 2363–2381. https://doi.org/10.32604/cmc.2022.023059.
+Haq, M.A., 2021a. SMOTEDNN: a novel model for air pollution forecasting and AQI 
+classification. Comput. Mater. Contin. 71, 1403–1425. https://doi.org/10.32604/ 
+cmc.2022.021968.
+Haq, M.A., 2024. Intellligent sustainable agricultural water practice using multi sensor 
+spatiotemporal evolution. Environ. Technol. 45, 2285–2298. https://doi.org/ 
+10.1080/09593330.2021.2005151.
+Haq, M.A., Khan, M.Y.A., 2022. Crop water requirements with changing climate in an 
+arid region of Saudi Arabia. Sustainability 14. https://doi.org/10.3390/ 
+su142013554.
+He, Q., Wang, M., Liu, K., Li, B., Jiang, Z., 2023. Spatiotemporal analysis of 
+meteorological drought across China based on the high-spatial-resolution multiscale 
+SPI generated by machine learning. Weather Clim. Extrem 40, 100567. https://doi. 
+org/10.1016/j.wace.2023.100567.
+Heiß, I., Stegmann, F., Wolf, M., Volk, M., Kaim, A., 2025. Supporting the spatial 
+allocation of management practices to improve ecosystem services – an opportunity 
+map approach for agricultural landscapes. Ecol. Indic. 172, 113212. https://doi.org/ 
+10.1016/j.ecolind.2025.113212.
+Huang, Y., Lei, H., Duan, L., 2024. Resistance of grassland productivity to drought and 
+heatwave over a temperate semi-arid climate zone. Sci. Total Environ. 951, 175495. 
+https://doi.org/10.1016/j.scitotenv.2024.175495.
+Huang, K., Wu, J., Fu, Z., Du, J., 2024. Comparative analysis of drought indices in the 
+tropical zones of China. Sci. Total Environ. 947, 174530. https://doi.org/10.1016/j. 
+scitotenv.2024.174530.
+Huang, Y., Zhang, X., Xu, J., Deng, L., Li, Y., 2025. Decoding Flow-Ecology relationships: 
+a machine learning framework for flow regime characterization and riparian 
+vegetation prediction. Ecol. Indic. 175, 113517. https://doi.org/10.1016/j. 
+ecolind.2025.113517.
+Javed, T., Wang, Z., Liu, J., Li, W., Lin, H., Zhang, J., 2024. Unlocking the 
+ecohydrological dynamics of vegetation growth’s impact on terrestrial water storage 
+trends across the China-Pakistan economic corridor. Sci. Total Environ. 955, 176977. 
+https://doi.org/10.1016/j.scitotenv.2024.176977.
+Jiang, J., 2020. Tracking moisture sources of precipitation over Central Asia: a study 
+based on the water-source-tagging method. J. Clim. 33. https://doi.org/10.1175/ 
+JCLI-D-20–0169.1.
+Jiang, L., Liu, W., Liu, B., Yuan, Y., Bao, A., 2023. Monitoring vegetation sensitivity to 
+drought events in China. Sci. Total Environ. 893, 164917. https://doi.org/10.1016/ 
+j.scitotenv.2023.164917.
+Jiang, J., Wang, Z., Zhang, Z., Wu, X., Lai, C., Zeng, Z., Chen, X., 2025. Extreme drought- 
+heatwave exacerbates water quality deterioration in China. Ecol. Indic. 170, 113008. 
+https://doi.org/10.1016/j.ecolind.2024.113008.
+Jiang, J., Zhou, T., Chen, X., Zhang, L., 2020. Future changes in precipitation over 
+Central Asia based on CMIP6 projections. Environ. Res. Lett. 15. https://doi.org/ 
+10.1088/1748–9326/ab7d03.
+Kafy, A.-, Al, Bakshi, Saha, A., Faisal, M., Al, A., Almulhim, A.I., Rahaman, Z.A., 
+Mohammad, P., 2023a. Assessment and prediction of index based agricultural 
+drought vulnerability using machine learning algorithms. Sci. Total Environ. 867, 
+161394. https://doi.org/10.1016/j.scitotenv.2023.161394.
+Kafy, A.-, Al, Bakshi, Saha, A., Faisal, M., Al, A., Almulhim, A.I., Rahaman, Z.A., 
+Mohammad, P., 2023b. Assessment and prediction of index based agricultural 
+drought vulnerability using machine learning algorithms. Sci. Total Environ. 867, 
+161394. https://doi.org/10.1016/j.scitotenv.2023.161394.
+Kang, W., Ni, F., Deng, Y., Xiang, J., Yue, Z., Wu, M., Jiang, N., 2024. Drought impacts on 
+blue and Green water: a spatial and temporal analysis. Ecol. Indic. 158, 111319. 
+https://doi.org/10.1016/j.ecolind.2023.111319.
+Karbasi, M., Jamei, M., Malik, A., Kisi, O., Yaseen, Z.M., 2023. Multi-steps drought 
+forecasting in arid and humid climate environments: development of integrative 
+machine learning model. Agric. Water Manag 281, 108210. https://doi.org/ 
+10.1016/j.agwat.2023.108210.
+Khan, Md.M.H., Muhammad, N.S., El-Shafie, A., 2020. Wavelet based hybrid ANN- 
+ARIMA models for meteorological drought forecasting. J. Hydrol. (Amst. ) 590, 
+125380. https://doi.org/10.1016/j.jhydrol.2020.125380.
+Li, J., 2022. Relationship between meteorological and hydrological droughts in the 
+upstream regions of the Lancang–Mekong river. J. Water Clim. Change 13 .
+Li, S., Han, Y., Li, C., Wang, J., 2024. A novel framework for multi-layer soil moisture 
+estimation with high spatio-temporal resolution based on data fusion and automated 
+machine learning. Agric. Water Manag 306, 109173. https://doi.org/10.1016/j. 
+agwat.2024.109173.
+Li, Z., Mu, Z., Qiu, X., Liu, J., 2025a. Changes in future drought characteristics in the Ili 
+river basin, China, using the new comprehensive standardized drought index. Ecol. 
+Indic. 173, 113412. https://doi.org/10.1016/j.ecolind.2025.113412.
+Li, Z., Mu, Z., Qiu, X., Liu, J., 2025b. Changes in future drought characteristics in the Ili 
+river basin, China, using the new comprehensive standardized drought index. Ecol. 
+Indic. 173, 113412. https://doi.org/10.1016/j.ecolind.2025.113412.
+Liu, K., Chen, Y., Wu, B., Xu, H., Waheed, A., Gao, F., He, B., Zhou, L., Wu, J., Zhang, Q., 
+Ju, J., 2025. Enhancing water use efficiency: insights from hydrological variability 
+encounter of multiple water sources and implications for terminal lake management 
+in arid regions. Ecol. Indic. 175, 113564. https://doi.org/10.1016/j. 
+ecolind.2025.113564.
+Liu, Quanshan, Wu, Z., Cui, N., Zheng, S., Zhu, S., Jiang, S., Wang, Z., Gong, D., Wang, Y., 
+Zhao, L., 2024. Soil moisture content estimation of drip-irrigated citrus orchard 
+based on UAV images and machine learning algorithm in southwest China. Agric. 
+Water Manag 303, 109069. https://doi.org/10.1016/j.agwat.2024.109069.
+Liu, X., Yang, Z., Chai, Y., 2024. A landscape pattern gradient analysis method coupling 
+wavelet algorithm for balancing development and protection activities of the coastal 
+zone: a case study. Ecol. Indic. 165, 112218. https://doi.org/10.1016/j. 
+ecolind.2024.112218.
+Liu, Qingping, Zhang, Xuan, Xu, Y., Li, C., Zhang, Xiu, Wang, X., 2024. Characteristics of 
+groundwater drought and its correlation with meteorological and agricultural 
+drought over the north China plain based on GRACE. Ecol. Indic. 161, 111925. 
+https://doi.org/10.1016/j.ecolind.2024.111925.
+Lomeo, D., Tebbs, E.J., Babayani, N.D., Chadwick, M.A., Gondwe, M.J., Jungblut, A.D., 
+McCulloch, G.P., Morgan, E.R., Schillereff, D.N., Simis, S.G.H., Songhurst, A.C., 
+2024. Remote sensing and spatial analysis reveal unprecedented Cyanobacteria 
+bloom dynamics associated with elephant mass mortality. Sci. Total Environ. 957, 
+177525. https://doi.org/10.1016/j.scitotenv.2024.177525.
+M. Zubair et al.                                                                                                                                                                                                                                 Agricultural Water Management 321 (2025) 109922 
+14 
+
+Luan, Q., Gu, P., Sun, Q., Lai, B., Zhou, Y., Weng, B., 2024b. Agricultural drought 
+evaluation based on a soil moisture index coupled hydrological model in north China 
+plain. Ecol. Indic. 166, 112473. https://doi.org/10.1016/j.ecolind.2024.112473 .
+Luan, Q., Gu, P., Sun, Q., Lai, B., Zhou, Y., Weng, B., 2024a. Agricultural drought 
+evaluation based on a soil moisture index coupled hydrological model in north China 
+plain. Ecol. Indic. 166, 112473. https://doi.org/10.1016/j.ecolind.2024.112473 .
+Lynch, J.P., 2022. Edaphic stress interactions: important yet poorly understood drivers of 
+plant production in future climates. Field Crops Res 283 .
+Manu, R., 2022. Responses of tree growth and biomass production to nutrient addition in 
+a semi-deciduous tropical forest in Africa. Ecology 103 .
+Mohammed, S., Arshad, S., Alsilibe, F., Moazzam, M.F.U., Bashir, B., Prodhan, F.A., 
+Alsalman, A., Vad, A., Ratonyi, T., Hars ´anyi, E., 2024. Utilizing machine learning 
+and CMIP6 projections for short-term agricultural drought monitoring in central 
+Europe (1900 – 2100). J. Hydrol. 633, 130968. https://doi.org/10.1016/j. 
+jhydrol.2024.130968 .
+Moreno-de-las-Heras, M., Bochet, E., Vicente-Serrano, S.M., Espigares, T., Molina, M.J., 
+Monle ´on, V., Nicolau, J.M., Tormo, J., García-Fayos, P., 2023. Drought conditions, 
+aridity and forest structure control the responses of iberian holm oak woodlands to 
+extreme droughts: a large-scale remote-sensing exploration in eastern Spain. Sci. 
+Total Environ. 901, 165887. https://doi.org/10.1016/j.scitotenv.2023.165887 .
+Mpakairi, K.S., Dube, T., Sibanda, M., Mutanga, O., 2025. Leveraging remote sensing for 
+optimised national scale agricultural water management in South Africa. Sci. Total 
+Environ. 974, 179199. https://doi.org/10.1016/j.scitotenv.2025.179199 .
+Muzammil, M., Zahid, A., Farooq, U., Saddique, N., Breuer, L., 2023. Climate change 
+adaptation strategies for sustainable water management in the Indus basin of 
+Pakistan. Sci. Total Environ. 878, 163143. https://doi.org/10.1016/j. 
+scitotenv.2023.163143 .
+Nourani, V., Ahmadi, R., Zhang, Y., D ą browska, D., 2025. Ensemble machine learning- 
+based extrapolation of Penman-Monteith-Leuning evapotranspiration data. Ecol. 
+Indic. 170, 113012. https://doi.org/10.1016/j.ecolind.2024.113012 .
+Novoa, V., Rojas, O., Ahumada-Rudolph, R., Arumí, J.L., Munizaga, J., de la Barrera, F., 
+Cabrera-Pardo, J.R., Rojas, C., 2023. Water footprint and virtual water flows from 
+the global south: foundations for sustainable agriculture in periods of drought. Sci. 
+Total Environ. 869, 161526. https://doi.org/10.1016/j.scitotenv.2023.161526 .
+Oh, H., Kim, H.J., Mehboob, M.S., Kim, J., Kim, Y., 2023. Sources and uncertainties of 
+future global drought risk with ISIMIP2b climate scenarios and socioeconomic 
+indicators. Sci. Total Environ. 859, 160371. https://doi.org/10.1016/j. 
+scitotenv.2022.160371 .
+de Oliveira, M.L., dos Santos, C.A.C., de Oliveira, G., Silva, M.T., da Silva, B.B., Cunha, J. 
+E., de, B.L., Ruhoff, A., Santos, C.A.G., 2022. Remote sensing-based assessment of 
+land degradation and drought impacts over terrestrial ecosystems in northeastern 
+Brazil. Sci. Total Environ. 835, 155490. https://doi.org/10.1016/j. 
+scitotenv.2022.155490 .
+Pande, C.B., Egbueri, J.C., Costache, R., Sidek, L.M., Wang, Q., Alshehri, F., Din, N.M., 
+Gautam, V.K., Chandra Pal, S., 2024. Predictive modeling of land surface 
+temperature (LST) based on Landsat-8 satellite data and machine learning models for 
+sustainable development. J. Clean. Prod. 444, 141035. https://doi.org/10.1016/j. 
+jclepro.2024.141035 .
+Putzenlechner, B., Koal, P., Kappas, M., L ¨ow, M., Mundhenk, P., Tischer, A., Wernicke, J., 
+Koukal, T., 2023. Towards precision forestry: drought response from remote sensing- 
+based disturbance monitoring and fine-scale soil information in central Europe. Sci. 
+Total Environ. 880, 163114. https://doi.org/10.1016/j.scitotenv.2023.163114 .
+Qamer, F.M., Abbas, S., Ahmad, B., Hussain, A., Salman, A., Muhammad, S., Nawaz, M., 
+Shrestha, S., Iqbal, B., Thapa, S., 2023. A framework for multi-sensor satellite data to 
+evaluate crop production losses: the case study of 2022 Pakistan floods. Sci. Rep. 13, 
+4240. https://doi.org/10.1038/s41598 – 023-30347-y .
+Rahman, G., Khalid, S., Arshad, S., Moazzam, M.F.U., Kwon, H.-H., 2025. Remote 
+sensing-based spatiotemporal assessment of agricultural drought and its impact on 
+crop yields in punjab, Pakistan. Sci. Rep. 15, 20586. https://doi.org/10.1038/ 
+s41598 – 025-06095 – 6 .
+Rahman, K.U., Mao, D., Ejaz, N., Bao Pham, Q., Hussain, A., Mohajane, M., Ali, M., 
+Shang, S., 2024. Environmental impacts of the billion tree tsunami project in khyber 
+pakhtunkhwa on the dynamics of Agro-Meteorological droughts. J. Hydrol. (Amst. ) 
+645, 132205. https://doi.org/10.1016/j.jhydrol.2024.132205 .
+Rahmati, O., Falah, F., Dayal, K.S., Deo, R.C., Mohammadi, F., Biggs, T., Moghaddam, D. 
+D., Naghibi, S.A., Bui, D.T., 2020. Machine learning approaches for spatial modeling 
+of agricultural droughts in the south-east region of Queensland Australia. Sci. Total 
+Environ. 699, 134230. https://doi.org/10.1016/j.scitotenv.2019.134230 .
+Sadeghi-Jahani, H., Ketabchi, H., Shafizadeh-Moghadam, H., 2024. Spatiotemporal 
+assessment of sustainable groundwater management using process-based and remote 
+sensing indices: a novel approach. Sci. Total Environ. 918, 170828. https://doi.org/ 
+10.1016/j.scitotenv.2024.170828 .
+Sadiq, Md.A., Sarkar, S.K., Raisa, S.S., 2023a. Meteorological drought assessment in 
+Northern Bangladesh: a machine learning-based approach considering remote 
+sensing indices. Ecol. Indic. 157, 111233. https://doi.org/10.1016/j. 
+ecolind.2023.111233 .
+Sadiq, Md.A., Sarkar, S.K., Raisa, S.S., 2023b. Meteorological drought assessment in 
+Northern Bangladesh: a machine learning-based approach considering remote 
+sensing indices. Ecol. Indic. 157, 111233. https://doi.org/10.1016/j. 
+ecolind.2023.111233 .
+Satiz ´abal-Alarc ´on, D.A., Suhogusoff, A., Ferrari, L.C., 2024. Characterization of 
+groundwater storage changes in the Amazon River basin based on downscaling of 
+GRACE/GRACE-FO data with machine learning models. Sci. Total Environ. 912, 
+168958. https://doi.org/10.1016/j.scitotenv.2023.168958 .
+Sezen, C., 
+ˇ
+Sraj, M., 2024. Improving the simulations of the hydrological model in the 
+karst catchment by integrating the conceptual model with machine learning models. 
+Sci. Total Environ. 926, 171684. https://doi.org/10.1016/j.scitotenv.2024.171684 .
+Smith, C., Baker, J.C.A., Spracklen, D.V., 2023. Tropical deforestation causes large 
+reductions in observed precipitation. Nature 615 .
+Smith, T., Boers, N., 2023. Global vegetation resilience linked to water availability and 
+variability. Nat. Commun. 14 .
+Su, J., Ding, Y., Liu, Y., Wang, J., Zhang, Y., 2024. China is suffering from fewer but more 
+severe drought to flood abrupt alternation events. Weather Clim. Extrem 46, 
+100737. https://doi.org/10.1016/j.wace.2024.100737 .
+Tao, L., Cui, Z., He, Y., Yang, D., 2024. An explainable multiscale LSTM model with 
+wavelet transform and layer-wise relevance propagation for daily streamflow 
+forecasting. Sci. Total Environ. 929, 172465. https://doi.org/10.1016/j. 
+scitotenv.2024.172465 .
+Thomas, E., Wilson, D., Kathuni, S., Libey, A., Chintalapati, P., Coyle, J., 2021. 
+A contribution to drought resilience in east Africa through groundwater pump 
+monitoring informed by in-situ instrumentation, remote sensing and ensemble 
+machine learning. Sci. Total Environ. 780, 146486. https://doi.org/10.1016/j. 
+scitotenv.2021.146486 .
+Usman, M., Clift, P.D., Pastore, G., Vezzoli, G., And `o, S., Barbarano, M., Vermeesch, P., 
+Garzanti, E., 2024. Climatic influence on sediment distribution and transport in the 
+thar desert (Sindh and Cholistan, Pakistan). Earth Sci. Rev. 249, 104674. https://doi. 
+org/10.1016/j.earscirev.2024.104674 .
+Vallicrosa, H., 2023. Phosphorus scarcity contributes to nitrogen limitation in lowland 
+tropical rainforests. Ecology 104 .
+Wang, Y., Chen, Y., Wen, J., Wu, C., Zhou, W., Han, L., Tang, X., 2024a. Early warning of 
+drought-induced vegetation stress using multiple satellite-based ecological 
+indicators. Ecol. Indic. 169, 112857. https://doi.org/10.1016/j. 
+ecolind.2024.112857 .
+Wang, Y., Chen, Y., Wen, J., Wu, C., Zhou, W., Han, L., Tang, X., 2024b. Early warning of 
+drought-induced vegetation stress using multiple satellite-based ecological 
+indicators. Ecol. Indic. 169, 112857. https://doi.org/10.1016/j. 
+ecolind.2024.112857 .
+Wang, F., Lai, H., Li, Y., Feng, K., Tian, Q., Guo, W., Zhang, W., Di, D., Yang, H., 2023. 
+Dynamic variations of terrestrial ecological drought and propagation analysis with 
+meteorological drought across the mainland China. Sci. Total Environ. 896, 165314. 
+https://doi.org/10.1016/j.scitotenv.2023.165314 .
+Wang, F., Lai, H., Men, R., Sun, K., Li, Y., Feng, K., Tian, Q., Guo, W., Du, X., Qu, Y., 
+2024. Spatial and temporal evolutions of terrestrial vegetation drought and the 
+influence of atmospheric circulation factors across the mainland China. Ecol. Indic. 
+158, 111455. https://doi.org/10.1016/j.ecolind.2023.111455 .
+Wang, B., Li, L., Feng, P., Chen, C., Luo, J.-J., Taschetto, A.S., Harrison, M.T., Liu, K., 
+Liu, D.L., Yu, Q., Guo, X., 2024. Probabilistic analysis of drought impact on wheat 
+yield and climate change implications. Weather Clim. Extrem 45, 100708. https:// 
+doi.org/10.1016/j.wace.2024.100708 .
+Wei, X., Wu, X., Zhang, H., Lan, T., Cheng, C., Wu, Y., Aggidis, G., 2024. A framework for 
+drought monitoring and assessment from a drought propagation perspective under 
+non-stationary environments. Sci. Total Environ. 953, 175981. https://doi.org/ 
+10.1016/j.scitotenv.2024.175981 .
+Weng, Z., Niu, J., Guan, H., Kang, S., 2023. Three-dimensional linkage between 
+meteorological drought and vegetation drought across China. Sci. Total Environ. 
+859, 160300. https://doi.org/10.1016/j.scitotenv.2022.160300 .
+Wright, S.J., Kitajima, K., 2022. Leaf ontogeny and phenology influence nutrient, 
+moisture and light limitation of ecosystem productivity in tropical forests. Tree 
+Physiol. 42 .
+Wu, M., 2021. A very likely weakening of pacific walker circulation in constrained near- 
+future projections. Nat. Commun. 12. https://doi.org/10.1038/s41467 – 021-26693- 
+y .
+Wu, G., 2022. Impacts of global climate warming on meteorological and hydrological 
+droughts and their propagations. Earths Future 10 .
+Wu, W., Deng, S., Chen, C., Su, H., 2024. Unraveling Multi-Scale dynamics of estuarine 
+wetland vegetation using the multi-resolution analysis wavelet transform and the 
+landsat time-series. Ecol. Indic. 158, 111342. https://doi.org/10.1016/j. 
+ecolind.2023.111342 .
+Xi, X., Liang, M., Yuan, X., 2024. Increased atmospheric water stress on gross primary 
+productivity during flash droughts over China from 1961 to 2022. Weather Clim. 
+Extrem 44, 100667. https://doi.org/10.1016/j.wace.2024.100667 .
+Xi, X., Yuan, X., 2023. Remote sensing of atmospheric and soil water stress on ecosystem 
+carbon and water use during flash droughts over eastern China. Sci. Total Environ. 
+868, 161715. https://doi.org/10.1016/j.scitotenv.2023.161715 .
+Xiao, X., Ming, W., Luo, X., Yang, L., Li, M., Yang, P., Ji, X., Li, Y., 2024. Leveraging 
+multisource data for accurate agricultural drought monitoring: a hybrid deep 
+learning model. Agric. Water Manag 293, 108692. https://doi.org/10.1016/j. 
+agwat.2024.108692 .
+Xu, X., Chen, F., Wang, B., Harrison, M.T., Chen, Y., Liu, K., Zhang, C., Zhang, M., 
+Zhang, X., Feng, P., Hu, K., 2024. Unleashing the power of machine learning and 
+remote sensing for robust seasonal drought monitoring: a stacking ensemble 
+approach. J. Hydrol. (Amst. ) 634, 131102. https://doi.org/10.1016/j. 
+jhydrol.2024.131102 .
+Xu, L., Ning, S., Xu, X., Wang, S., Chen, L., Long, R., Zhang, S., Zhou, Y., Zhang, M., 
+Thapa, B.R., 2024. Comparative analysis of machine learning models and 
+explainable AI for agriculture drought prediction: a case study of the Ta-pieh 
+mountains. Agric. Water Manag 306, 109176. https://doi.org/10.1016/j. 
+agwat.2024.109176 .
+M. Zubair et al.                                                                                                                                                                                                                                 Agricultural Water Management 321 (2025) 109922 
+15 
+
+Xu, W., Tang, M., Jin, J., Xie, Q., Hu, Y., 2024. Concept and method of drought disaster 
+risk measurement based on drought propagation level–a case study of AnHui 
+province. Ecol. Indic. 166, 112286. https://doi.org/10.1016/j.ecolind.2024.112286 .
+Xue, C., Zhang, Q., Jia, Y., Tang, H., Zhang, H., 2024. Attribution of hydrological 
+droughts in large river-connected lakes: insights from an explainable machine 
+learning model. Sci. Total Environ. 952, 175999. https://doi.org/10.1016/j. 
+scitotenv.2024.175999 .
+Yang, G., Chen, Y., Ren, Q., Liu, Q., Ren, M., Zheng, J., Zhang, R., Xia, Z., Zhang, L., 
+Wan, C., Luo, X., 2024. Remote sensing ecological index (RSEI) affects microbial 
+community diversity in ecosystems of different qualities. Sci. Total Environ. 954, 
+176489. https://doi.org/10.1016/j.scitotenv.2024.176489 .
+Yu, T., Guli ⋅ Jiapaer, Bao, A., Zhang, J., Tu, H., Chen, B., De Maeyer, P., Van de 
+Voorde, T., 2023. Evaluating surface soil moisture characteristics and the 
+performance of remote sensing and analytical products in Central Asia. J. Hydrol. 
+(Amst. ) 617, 128921. https://doi.org/10.1016/j.jhydrol.2022.128921 .
+Yu, L., Leng, G., Python, A., 2022. A comprehensive validation for GPM IMERG 
+precipitation products to detect extremes and drought over mainland China. 
+Weather Clim. Extrem 36, 100458. https://doi.org/10.1016/j.wace.2022.100458 .
+Zafar, Z., Nadeem, A.A., Zha, Y., Gilani, H., Tariq, A., 2025. Snow cover variability 
+assessment and its interplay with hydro-climatic characteristics in data scarce region 
+of Gilgit-Baltistan, Pakistan. J. Environ. Manag. 382, 125375. https://doi.org/ 
+10.1016/j.jenvman.2025.125375 .
+Zafar, Z., Zubair, M., Fahd, S., 2024a. Extreme weather events and their socioeconomic 
+impacts: a remote sensing-based analysis of flood damages. Glob. Earth Surf. Process. 
+Change 1, 100001. https://doi.org/10.1016/j.gespch.2024.100001 .
+Zafar, Z., Zubair, M., Zha, Y., Fahd, S., Ahmad Nadeem, A., 2024b. Performance 
+assessment of machine learning algorithms for mapping of land use/land cover using 
+remote sensing data. Egypt. J. Remote Sens. Space Sci. 27, 216 – 226. https://doi.org/ 
+10.1016/j.ejrs.2024.03.003 .
+Zeng, J., Zhang, R., Qu, Y., Bento, V.A., Zhou, T., Lin, Y., Wu, X., Qi, J., Shui, W., 
+Wang, Q., 2022. Improving the drought monitoring capability of VHI at the global 
+scale via ensemble indices for various vegetation types from 2001 to 2018. Weather 
+Clim. Extrem 35, 100412. https://doi.org/10.1016/j.wace.2022.100412 .
+Zhang, B., Abu Salem, F.K., Hayes, M.J., Smith, K.H., Tadesse, T., Wardlow, B.D., 2023. 
+Explainable machine learning for the prediction and assessment of complex drought 
+impacts. Sci. Total Environ. 898, 165509. https://doi.org/10.1016/j. 
+scitotenv.2023.165509 .
+Zhang, P., Cai, Y., Cong, P., Xie, Y., Chen, W., Cai, J., Bai, X., 2024. Quantitation of 
+meteorological, hydrological and agricultural drought under climate change in the 
+east river basin of south China. Ecol. Indic. 158, 111304. https://doi.org/10.1016/j. 
+ecolind.2023.111304 .
+Zhang, M., Fern ´andez-Torres, M.-
+´
+A., Camps-Valls, G., 2024. Domain knowledge-driven 
+variational recurrent networks for drought monitoring. Remote Sens Environ. 311, 
+114252. https://doi.org/10.1016/j.rse.2024.114252 .
+Zhang, D., Hu, B., Chen, L., Qi, P., Wu, Y., Liu, X., Zhang, G., Zhang, W., 2024. 
+Spatiotemporal variation of water level in wetlands based on multi-source remote 
+sensing data and responses to changing environments. Sci. Total Environ. 955, 
+177060. https://doi.org/10.1016/j.scitotenv.2024.177060 .
+Zhang, X., Zhang, Xu, Terfa, B.K., Nam, W.-H., Zeng, J., Ma, H., Gu, X., Du, W., Wang, C., 
+Yang, J., Wang, P., Niyogi, D., Chen, N., 2024. Mapping global drought-induced 
+forest mortality based on multiple satellite vegetation optical depth data. Remote 
+Sens Environ. 315, 114406. https://doi.org/10.1016/j.rse.2024.114406 .
+Zhao, Yuxin, Dong, H., Huang, W., He, S., Zhang, C., 2024. Seamless terrestrial 
+evapotranspiration estimation by machine learning models across the contiguous 
+United States. Ecol. Indic. 165, 112203. https://doi.org/10.1016/j. 
+ecolind.2024.112203 .
+Zhao, Yue, Xiong, L., Yin, J., Zha, X., Li, W., Han, Y., 2024. Understanding the effects of 
+flash drought on vegetation photosynthesis and potential drivers over China. Sci. 
+Total Environ. 931, 172926. https://doi.org/10.1016/j.scitotenv.2024.172926 .
+Zhao, Q., Zhang, X., Li, C., Xu, Y., Fei, J., 2024. Compound ecological drought assessment 
+of China using a Copula-based drought index. Ecol. Indic. 164, 112141. https://doi. 
+org/10.1016/j.ecolind.2024.112141 .
+Zheng, H., Xu, Z., Hu, T., Cheng, X., Xia, P., Peng, J., 2023. A wavelet coherence 
+approach to zoning supply-demand matching of carbon sequestration service. Sci. 
+Total Environ. 901, 165641. https://doi.org/10.1016/j.scitotenv.2023.165641 .
+Zhou, Y., Zaitchik, B.F., Kumar, S.V., Nie, W., Loomis, B.D., Richey McLarty, A.S., 
+Appana, R., 2024. Satellite-informed simulation of irrigation in south Asia: 
+opportunities and uncertainties. J. Hydrol. (Amst. ) 641, 131758. https://doi.org/ 
+10.1016/j.jhydrol.2024.131758 .
+Zhu, Y., Jiang, S., Ren, L., Guo, J., Zhong, F., Du, S., Cui, H., He, M., Duan, Z., 2024. 
+Three-dimensional ecological drought identification and evaluation method 
+considering eco-physiological status of terrestrial ecosystems. Sci. Total Environ. 
+951, 175423. https://doi.org/10.1016/j.scitotenv.2024.175423 .
+M. Zubair et al.                                                                                                                                                                                                                                 Agricultural Water Management 321 (2025) 109922 
+16 

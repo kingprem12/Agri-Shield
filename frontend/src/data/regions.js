@@ -1,0 +1,56 @@
+const regions = [
+  ["Andhra Pradesh", "Guntur", 16.31, 80.44, 0.47, 36, 58, 34, 48, 3.5, 0.34],
+  ["Arunachal Pradesh", "Itanagar", 27.08, 93.6, 0.66, 27, 210, 25, 78, 1.8, 0.67],
+  ["Assam", "Guwahati", 26.14, 91.73, 0.62, 30, 188, 28, 76, 2.1, 0.61],
+  ["Bihar", "Patna", 25.59, 85.13, 0.49, 35, 74, 33, 55, 2.7, 0.39],
+  ["Chhattisgarh", "Raipur", 21.25, 81.63, 0.52, 35, 86, 33, 53, 2.9, 0.42],
+  ["Goa", "Panaji", 15.49, 73.82, 0.64, 31, 230, 29, 77, 3.2, 0.68],
+  ["Gujarat", "Ahmedabad", 23.02, 72.57, 0.31, 41, 22, 38, 27, 4.8, 0.16],
+  ["Haryana", "Hisar", 29.15, 75.72, 0.39, 39, 32, 37, 32, 4.2, 0.23],
+  ["Himachal Pradesh", "Shimla", 31.1, 77.17, 0.61, 24, 118, 22, 62, 2.4, 0.55],
+  ["Jharkhand", "Ranchi", 23.34, 85.31, 0.5, 33, 72, 31, 55, 2.6, 0.4],
+  ["Karnataka", "Bengaluru Rural", 13.28, 77.6, 0.49, 33, 68, 31, 55, 3.1, 0.38],
+  ["Kerala", "Thrissur", 10.52, 76.21, 0.68, 30, 245, 28, 80, 2.2, 0.72],
+  ["Madhya Pradesh", "Bhopal", 23.25, 77.41, 0.43, 37, 44, 35, 42, 3.6, 0.29],
+  ["Maharashtra", "Pune", 18.52, 73.85, 0.42, 36, 45, 34, 38, 3.8, 0.25],
+  ["Manipur", "Imphal", 24.81, 93.94, 0.61, 28, 148, 26, 72, 1.9, 0.58],
+  ["Meghalaya", "Shillong", 25.57, 91.88, 0.69, 24, 260, 22, 84, 2.0, 0.74],
+  ["Mizoram", "Aizawl", 23.73, 92.72, 0.65, 27, 190, 25, 78, 1.8, 0.66],
+  ["Nagaland", "Kohima", 25.67, 94.1, 0.63, 26, 165, 24, 76, 1.9, 0.62],
+  ["Odisha", "Bhubaneswar", 20.29, 85.82, 0.53, 34, 96, 32, 62, 3.0, 0.45],
+  ["Punjab", "Ludhiana", 30.9, 75.85, 0.58, 32, 82, 30, 51, 2.9, 0.44],
+  ["Rajasthan", "Jodhpur", 26.23, 73.02, 0.28, 42, 18, 39, 24, 5.4, 0.14],
+  ["Sikkim", "Gangtok", 27.33, 88.61, 0.67, 23, 176, 21, 79, 1.7, 0.69],
+  ["Tamil Nadu", "Coimbatore", 11.01, 76.95, 0.51, 35, 52, 33, 47, 3.4, 0.33],
+  ["Telangana", "Hyderabad", 17.38, 78.49, 0.4, 38, 36, 36, 36, 3.9, 0.24],
+  ["Tripura", "Agartala", 23.83, 91.28, 0.63, 31, 170, 29, 77, 2.1, 0.62],
+  ["Uttar Pradesh", "Kanpur", 26.45, 80.33, 0.45, 37, 46, 35, 43, 3.4, 0.31],
+  ["Uttarakhand", "Dehradun", 30.32, 78.03, 0.6, 29, 124, 27, 65, 2.3, 0.54],
+  ["West Bengal", "Kolkata", 22.57, 88.36, 0.57, 33, 138, 31, 70, 2.6, 0.52],
+  ["Andaman and Nicobar Islands", "Port Blair", 11.62, 92.72, 0.67, 30, 230, 28, 81, 3.7, 0.71],
+  ["Chandigarh", "Chandigarh", 30.73, 76.78, 0.5, 35, 58, 33, 45, 3.2, 0.36],
+  ["Dadra and Nagar Haveli and Daman and Diu", "Daman", 20.39, 72.83, 0.46, 36, 44, 34, 50, 3.8, 0.31],
+  ["Delhi", "New Delhi", 28.61, 77.21, 0.35, 40, 26, 38, 30, 4.1, 0.19],
+  ["Jammu and Kashmir", "Jammu", 32.73, 74.86, 0.52, 31, 82, 29, 52, 2.7, 0.43],
+  ["Ladakh", "Leh", 34.15, 77.58, 0.22, 25, 8, 23, 18, 4.5, 0.12],
+  ["Lakshadweep", "Kavaratti", 10.56, 72.64, 0.62, 30, 145, 28, 79, 4.2, 0.59],
+  ["Puducherry", "Puducherry", 11.94, 79.81, 0.5, 34, 62, 32, 61, 3.1, 0.39]
+];
+
+export const REGIONS = regions.map(
+  ([state, district, latitude, longitude, ndvi, lst, rainfall, temperature, humidity, wind_speed, soil_moisture_proxy]) => ({
+    label: `${district}, ${state}`,
+    state,
+    district,
+    latitude,
+    longitude,
+    ndvi,
+    lst,
+    rainfall,
+    temperature,
+    humidity,
+    wind_speed,
+    soil_moisture_proxy
+  })
+);
+

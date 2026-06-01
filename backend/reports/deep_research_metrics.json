@@ -1,0 +1,64 @@
+{
+  "project": "AgriShield-X",
+  "target": "next-month VHI",
+  "trained_models": [
+    {
+      "model": "Real PyTorch LSTM",
+      "r2": -0.0992898941040039,
+      "rmse": 25.24019258597968,
+      "mae": 19.92858123779297,
+      "mape": 0.36280515789985657,
+      "explained_variance": 0.11759781837463379,
+      "accuracy_within_10_vhi": 0.3333333333333333
+    },
+    {
+      "model": "Real PyTorch CNN grid image model",
+      "r2": 0.02175086736679077,
+      "rmse": 24.225540882603376,
+      "mae": 20.2783260345459,
+      "mape": 0.41267743706703186,
+      "explained_variance": 0.3067634701728821,
+      "accuracy_within_10_vhi": 0.26785714285714285
+    },
+    {
+      "model": "Engineered feature XGBoost support model",
+      "r2": 0.31141841411590576,
+      "rmse": 19.976262310757814,
+      "mae": 16.115615844726562,
+      "mape": 0.33980631828308105,
+      "explained_variance": 0.43871796131134033,
+      "accuracy_within_10_vhi": 0.3888888888888889
+    },
+    {
+      "model": "Persistence support model",
+      "r2": -1.4236681291328748,
+      "rmse": 37.47771593934763,
+      "mae": 32.118681099806636,
+      "mape": 0.7483672245921565,
+      "explained_variance": -1.15888735065476,
+      "accuracy_within_10_vhi": 0.12962962962962962
+    },
+    {
+      "model": "Advanced Hybrid LSTM + CNN + XGBoost meta learner",
+      "r2": 0.3644605875015259,
+      "rmse": 19.191449582054684,
+      "mae": 15.597121238708496,
+      "mape": 0.3490159809589386,
+      "explained_variance": 0.4270210266113281,
+      "accuracy_within_10_vhi": 0.4074074074074074
+    }
+  ],
+  "base_paper": {
+    "model": "Wavelet-XGBoost",
+    "r2": 0.964,
+    "rmse": 0.021,
+    "mae": 0.023,
+    "note": "Extracted from referenced paper text. Metrics are not directly comparable unless target scaling, split strategy, and horizon match exactly."
+  },
+  "samples": {
+    "monthly_rows": 276,
+    "sequence_samples": 270,
+    "image_samples": 276,
+    "test_samples": 54
+  }
+}

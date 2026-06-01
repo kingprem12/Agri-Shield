@@ -1,0 +1,90 @@
+{
+  "project": "AgriShield-X",
+  "benchmark_type": "real_gridcell_next_month_vhi",
+  "base_paper": {
+    "model": "Wavelet-XGBoost",
+    "r2": 0.964,
+    "rmse": 0.021,
+    "mae": 0.023
+  },
+  "chronological_forecast_metrics": [
+    {
+      "model": "Real grid-cell XGBoost next-month",
+      "r2": 0.6329217223505836,
+      "rmse": 0.15218006687907717,
+      "mae": 0.1145950630822786,
+      "mape": 0.4428094246347012,
+      "explained_variance": 0.64650903293173,
+      "accuracy_within_0_10_vhi": 0.5590431974162293
+    },
+    {
+      "model": "Real grid-cell ExtraTrees next-month",
+      "r2": 0.6294533047899933,
+      "rmse": 0.1528973295036049,
+      "mae": 0.11433095760694426,
+      "mape": 0.4339232310241491,
+      "explained_variance": 0.6392039348724982,
+      "accuracy_within_0_10_vhi": 0.5666128381106177
+    },
+    {
+      "model": "Real grid-cell HistGradient next-month",
+      "r2": 0.6314572485269313,
+      "rmse": 0.1524833290159157,
+      "mae": 0.11463418087946929,
+      "mape": 0.43857086768981685,
+      "explained_variance": 0.6453961600683393,
+      "accuracy_within_0_10_vhi": 0.5596487686717804
+    },
+    {
+      "model": "Advanced real grid-cell hybrid blend next-month",
+      "r2": 0.6393311564896779,
+      "rmse": 0.15084563292970507,
+      "mae": 0.11334706507240896,
+      "mape": 0.4348412209434407,
+      "explained_variance": 0.6516797788484319,
+      "accuracy_within_0_10_vhi": 0.5634840532902705
+    }
+  ],
+  "paper_comparable_random_split_metrics": [
+    {
+      "model": "Real grid-cell XGBoost next-month paper-comparable random split",
+      "r2": 0.6828804551110605,
+      "rmse": 0.139915798504832,
+      "mae": 0.10136965155336837,
+      "mape": 0.725496896768189,
+      "explained_variance": 0.6829120530088562,
+      "accuracy_within_0_10_vhi": 0.6344
+    },
+    {
+      "model": "Real grid-cell ExtraTrees next-month paper-comparable random split",
+      "r2": 0.7224863350546324,
+      "rmse": 0.13088727831818506,
+      "mae": 0.0927386642734861,
+      "mape": 0.62083929635292,
+      "explained_variance": 0.7226403724945739,
+      "accuracy_within_0_10_vhi": 0.6652
+    },
+    {
+      "model": "Real grid-cell HistGradient next-month paper-comparable random split",
+      "r2": 0.6885369295306392,
+      "rmse": 0.1386623419275511,
+      "mae": 0.1003261627556122,
+      "mape": 0.7081735613415442,
+      "explained_variance": 0.6885533278927145,
+      "accuracy_within_0_10_vhi": 0.6378
+    }
+  ],
+  "best_model": {
+    "model": "Real grid-cell ExtraTrees next-month paper-comparable random split",
+    "r2": 0.7224863350546324,
+    "rmse": 0.13088727831818506,
+    "mae": 0.0927386642734861,
+    "mape": 0.62083929635292,
+    "explained_variance": 0.7226403724945739,
+    "accuracy_within_0_10_vhi": 0.6652
+  },
+  "rows": 50000,
+  "months": 272,
+  "grids": 4936,
+  "note": "Chronological split is the strict real forecast. Random split is included because many remote-sensing papers use random train/test splits; report it separately."
+}
