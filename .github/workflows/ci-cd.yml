@@ -1,0 +1,67 @@
+name: AgriShield AI CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - run: python scripts/run_etl.py --sample
+      - run: python scripts/train_model.py
+      - run: python scripts/train_agrishield_x.py --dataset-dir data/processed --pattern agri_monthly_features.csv --limit-files 6 || echo "Skipping AgriShield-X CI training without Sindh dataset"
+      - run: pytest
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package.json
+      - run: npm install
+      - run: npm test
+      - run: npm run build
+
+  deploy:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: [backend, frontend]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - name: Build frontend
+        working-directory: frontend
+        run: npm install && npm run build
+      - name: Deploy frontend to S3
+        run: aws s3 sync frontend/dist s3://${{ secrets.AWS_S3_BUCKET }} --delete
+      - name: Deploy backend to EC2
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /opt/agrishield-ai
+            git pull
+            docker compose up -d --build backend postgres

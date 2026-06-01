@@ -1,0 +1,37 @@
+{
+  "title": "AgriShield-X Monitoring",
+  "schemaVersion": 39,
+  "version": 1,
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Predictions",
+      "targets": [
+        {
+          "expr": "agrishield_predictions_total"
+        }
+      ],
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 8,
+        "h": 4
+      }
+    },
+    {
+      "type": "stat",
+      "title": "High Risk Alerts",
+      "targets": [
+        {
+          "expr": "agrishield_high_risk_predictions_total"
+        }
+      ],
+      "gridPos": {
+        "x": 8,
+        "y": 0,
+        "w": 8,
+        "h": 4
+      }
+    }
+  ]
+}
