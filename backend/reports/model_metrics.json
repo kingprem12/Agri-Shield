@@ -1,0 +1,21 @@
+{
+  "best_model": "xgboost",
+  "metrics": [
+    {
+      "model": "linear_regression",
+      "rmse": 1.266921838041542,
+      "r2": 0.9960703688865186
+    },
+    {
+      "model": "random_forest",
+      "rmse": 1.462584890930423,
+      "r2": 0.9947571929776526
+    },
+    {
+      "model": "xgboost",
+      "rmse": 1.204952401101572,
+      "r2": 0.9960719170887256
+    }
+  ],
+  "rows": 360
+}

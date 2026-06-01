@@ -1,0 +1,78 @@
+{
+  "project": "AgriShield-X",
+  "target": "next-month VHI",
+  "best_model": "temporal_fusion_transformer_fallback_stacking",
+  "rows": 23,
+  "metrics": [
+    {
+      "model": "random_forest",
+      "r2": 0.2616074977380805,
+      "rmse": 22.75746059302185,
+      "mae": 20.26090537838634,
+      "mape": 1.256188701922937,
+      "explained_variance": 0.5792451978065244
+    },
+    {
+      "model": "adaboost",
+      "r2": 0.058347793266945114,
+      "rmse": 22.3782205601567,
+      "mae": 17.63738023209989,
+      "mape": 1.031928524437391,
+      "explained_variance": 0.6235142067885424
+    },
+    {
+      "model": "xgboost",
+      "r2": -0.34211877811441394,
+      "rmse": 24.60411859185541,
+      "mae": 19.34265914021371,
+      "mape": 1.2552461588710817,
+      "explained_variance": 0.5094228460776189
+    },
+    {
+      "model": "lstm_fallback_sequence_rf",
+      "r2": 0.2842737850702606,
+      "rmse": 22.67781075565452,
+      "mae": 20.0728756241518,
+      "mape": 1.052619989524872,
+      "explained_variance": 0.587694167467565
+    },
+    {
+      "model": "bilstm_fallback_sequence_xgb",
+      "r2": -0.21388667809616985,
+      "rmse": 24.127322792547055,
+      "mae": 19.568306453467926,
+      "mape": 1.1502419643411532,
+      "explained_variance": 0.6199266878506214
+    },
+    {
+      "model": "cnn_lstm_fallback_wavelet_xgb",
+      "r2": -0.4113654139165843,
+      "rmse": 25.141501968841585,
+      "mae": 19.603346525270197,
+      "mape": 1.3562020038365672,
+      "explained_variance": 0.45197722044745425
+    },
+    {
+      "model": "temporal_fusion_transformer_fallback_stacking",
+      "r2": 0.36845507863746707,
+      "rmse": 20.998713362412154,
+      "mae": 18.553787538755667,
+      "mape": 1.053915653445571,
+      "explained_variance": 0.604626532426171
+    },
+    {
+      "model": "hybrid_cnn_bilstm_xgboost_stacking",
+      "r2": 0.1201839557559895,
+      "rmse": 24.978087540973,
+      "mae": 17.8159102948316,
+      "mape": 4.196074205641344,
+      "explained_variance": 0.12693716416876666
+    }
+  ],
+  "paper_baseline": {
+    "model": "Wavelet-XGBoost reference",
+    "rmse": 7.5,
+    "r2": 0.86,
+    "note": "Placeholder from literature comparison table; replace with exact cited result."
+  }
+}
