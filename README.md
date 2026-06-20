@@ -1,121 +1,236 @@
 # AgriShield-X
 
-Production-grade research prototype: Real-Time Agricultural Drought Forecasting using Multi-Source Remote Sensing, Deep Learning and Hybrid Ensemble Learning.
+AgriShield-X is a final-year major project for real-time agricultural drought forecasting over Sindh using Google Earth Engine satellite data, climate variables, heuristic optimization, machine learning, a secured FastAPI backend, and a React agriculture dashboard.
 
-The repository also keeps the original AgriShield AI drought prediction flow, now extended with AgriShield-X VHI forecasting, Sindh CSV ingestion, wavelet features, baseline and hybrid ensembles, explainability endpoints, Prometheus/Grafana monitoring, and AWS deployment assets.
+Repository: https://github.com/kingprem12/Agri-Shield
 
-Cloud-based agricultural drought prediction and early warning system for a Final Year Engineering Major Project.
+## Problem Statement
 
-AgriShield AI predicts agricultural drought severity from satellite vegetation, land-surface temperature, rainfall, and weather features. The project includes automated ETL, wavelet feature engineering, model training, FastAPI inference, a React dashboard, PostgreSQL persistence, Docker, CI, and AWS deployment assets.
+Agricultural drought develops when vegetation stress, rainfall shortage, heat, soil-water limitations, and seasonal climate pressure combine over time. Farmers need early warning before the next month begins, not only same-month reconstruction. AgriShield-X addresses this by predicting next-month Vegetation Health Index (`vhi_next_month`) from past and current satellite/climate indicators using a strict future-forecasting protocol.
 
-## Features
+## Dataset Summary
 
-- MODIS NDVI, MODIS LST, CHIRPS rainfall, and NASA POWER weather ETL scripts
-- Monthly aggregation, missing-value cleaning, wavelet transforms, lag features, and rolling averages
-- XGBoost, Random Forest, and Linear Regression training with `TimeSeriesSplit`
-- Best-model selection by RMSE and R², saved with Joblib
-- FastAPI endpoints: `/health`, `/predict`, `/metrics`
-- AgriShield-X endpoints: `/forecast`, `/explain`, `/benchmark`, `/retrain`
-- PostgreSQL-backed prediction history
-- React + Tailwind dashboard with Leaflet India map and Plotly charts
-- Docker Compose for local full-stack execution
-- GitHub Actions validation workflow
-- AWS EC2/S3/Nginx/HTTPS deployment scripts and guide
-- JWT authentication with FARMER and ADMIN roles
-- Protected frontend routes for forecasting, maps, research results, advisories, crop recommendations, and admin analytics
-- Terraform infrastructure for EC2, S3 static hosting, security groups, and SSM instance access
+| Item | Value |
+|---|---:|
+| Region | Sindh |
+| Study period | 2001-2023 |
+| Rows | 1,361,299 |
+| Grid cells | 4,937 |
+| Target | `vhi_next_month` |
+| Forecast type | Strict next-month forecasting |
+
+Data sources and engineered variables include MODIS NDVI/LST, CHIRPS rainfall, ERA5 climate variables, EVI, SPI, SPEI, solar radiation, temperature, humidity, wind speed, lag features, rolling statistics, seasonal encoding, and wavelet-derived features. Soil moisture is used where available.
+
+## Current Production Candidate
+
+Model: **PSO-Optimized LightGBM** / **PSO LightGBM future-forecasting candidate**
+
+Current strict future forecasting metrics:
+
+| Metric | Value |
+|---|---:|
+| R2 | 0.8153 |
+| RMSE | 0.1097 |
+| MAE | 0.0839 |
+| F1 | 0.6354 |
+
+Research honesty note: the main result is strict next-month forecasting. Same-month estimation is reported separately and is not used as the future forecasting claim.
+
+## Frontend Routes
+
+Public routes:
+
+- `/`
+- `/auth`
+- `/login`
+- `/signup`
+
+Authenticated FARMER routes:
+
+- `/forecast-dashboard`
+- `/interactive-map`
+- `/historical-analysis`
+- `/explainability`
+- `/crop-recommendation`
+- `/farmer-advisory`
+- `/research-results`
+- `/sindh-pso`
+- `/classic-dashboard`
+- `/analytics`
+- `/benchmark`
+
+ADMIN route:
+
+- `/admin`
+
+Unauthenticated users are redirected to `/auth` when opening protected pages. FARMER users cannot access `/admin`. ADMIN users can access all FARMER pages plus the admin console.
+
+## Backend API Routes
+
+Auth:
+
+- `POST /auth/signup`
+- `POST /auth/login`
+- `POST /auth/logout`
+- `POST /auth/refresh`
+- `GET /auth/profile`
+- `POST /auth/verify-email`
+- `POST /auth/forgot-password`
+
+Admin:
+
+- `GET /admin/users`
+- `GET /admin/analytics`
+
+Forecasting and research:
+
+- `GET /health`
+- `POST /predict`
+- `GET /history`
+- `POST /forecast`
+- `POST /explain`
+- `GET /benchmark`
+- `GET /research-metrics`
+- `GET /research/results`
+- `GET /pso-future/metrics`
+- `POST /pso-future/predict`
+- `GET /pso-sindh/metrics`
+- `GET /pso-sindh/benchmark`
+- `POST /pso-sindh/predict`
+- `GET /pso-sindh/feature-importance`
+
+Farmer support:
+
+- `GET /map`
+- `POST /crops`
+- `POST /advisories`
+
+Protected APIs require a JWT bearer token where appropriate.
 
 ## Authentication and Roles
 
-Unauthenticated users can access only the landing and auth pages. FARMER users can access forecasting, map, history, explainability, crop recommendation, advisory, research, and Sindh PSO pages. ADMIN users can access all FARMER pages plus the admin console.
+Roles:
 
-Public signup always creates a FARMER account. ADMIN accounts are created safely from backend environment variables:
+- `FARMER`
+- `ADMIN`
+
+Public signup creates FARMER accounts only. ADMIN accounts are seeded through backend environment variables:
 
 ```bash
 SEED_ADMIN_EMAIL=admin@example.com
 SEED_ADMIN_PASSWORD=replace-with-a-strong-password
 ```
 
-Never commit real secrets. Use `.env.example` as the placeholder reference.
+Passwords are hashed in the backend. JWT access tokens and refresh tokens are used for session handling. Do not commit real secrets.
 
-## Quick Start
+## Cloud Architecture
+
+- Frontend: React + Vite static build hosted on AWS S3 static website hosting
+- Backend: FastAPI service running in Docker on AWS EC2
+- Database: PostgreSQL in Docker for deployment, SQLite for local development
+- Infrastructure: Terraform definitions for EC2, S3, security group, IAM role, and SSM-capable instance profile
+- Deployment helpers: shell scripts under `scripts/`
+
+## Current Live URLs
+
+Old live deployment:
+
+- Frontend: http://agrishield-x-907739324681-ap-south-1.s3-website.ap-south-1.amazonaws.com
+- Backend API: http://3.109.59.56:8000
+- Health: http://3.109.59.56:8000/health
+- Benchmark: http://3.109.59.56:8000/benchmark
+- PSO future metrics: http://3.109.59.56:8000/pso-future/metrics
+- EC2 public IP: `3.109.59.56`
+- S3 bucket: `agrishield-x-907739324681-ap-south-1`
+
+Newer S3 bucket observed:
+
+- http://agrishield-x-parallel-20260621005550-frontend.s3-website.ap-south-1.amazonaws.com
+
+Deployment status: PR #2 is merged into `main`, but the new claymorphism/auth UI and latest backend APIs are **not confirmed live** on the old EC2/S3 deployment. The old backend returns `404` for `/pso-future/metrics`, so redeployment is still pending.
+
+## Local Run
+
+Backend:
 
 ```bash
 cd backend
-python3 -m venv .venv
+python -m venv .venv
 source .venv/bin/activate
-pip install -r requirements-research.txt
-python scripts/run_etl.py --sample
-python scripts/train_model.py
-python scripts/train_agrishield_x.py --limit-files 36
-python scripts/train_deep_hybrid_benchmark.py --dataset-dir "../Data Sets" --limit-files 276 --max-grid-rows 10000 --epochs 8
-python scripts/generate_deep_hybrid_plots.py
+pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
-In another terminal:
+Frontend:
 
 ```bash
 cd frontend
 npm install
-npm run dev
+VITE_API_BASE_URL=http://localhost:8000 npm run dev
 ```
-
-Open `http://localhost:5173`.
-
-## Docker Local Run
-
-```bash
-docker compose up --build
-```
-
-- Frontend: `http://localhost:5173`
-- Backend API: `http://localhost:8000`
-- API docs: `http://localhost:8000/docs`
-- PostgreSQL: `localhost:5432`
-- Prometheus: `http://localhost:9090`
-- Grafana: `http://localhost:3001` (`admin` / `agrishield`)
 
 ## Tests
 
 ```bash
 cd backend
-python -m pytest tests
+PYTHONPATH=. python -m pytest tests
 
 cd ../frontend
+npm install
 npm test -- --run
 npm run build
 ```
 
-## Terraform
+## Terraform Usage
 
 ```bash
 cd infrastructure/terraform
 cp terraform.tfvars.example terraform.tfvars
+# edit ssh_allowed_cidr and optional names
 terraform init
+terraform fmt -check
+terraform validate
 terraform plan
 terraform apply
+```
+
+Destroy:
+
+```bash
 terraform destroy
 ```
 
-Terraform state, local variables, PEM keys, datasets, model artifacts, and `.env` files are ignored and must not be committed.
+Do not commit `terraform.tfvars`, `.terraform/`, Terraform state, `.env`, PEM files, datasets, or large model artifacts.
 
-## Current Research Result
+## Deployment Steps
 
-The latest deep-hybrid benchmark is saved at `backend/reports/deep_hybrid_benchmark.json`.
+1. Confirm the target EC2 and S3 bucket.
+2. Confirm model artifacts exist on the EC2 host or copy them securely.
+3. Configure production environment variables securely.
+4. Pull latest `main` on the backend host.
+5. Rebuild/restart backend Docker service.
+6. Build frontend with the live API URL:
 
-Honest conclusion: the current best result beats the base paper metrics only under same-month VHI estimation, not strict future forecasting. Strict future forecasting, random split, same-month estimation, and spatial grid-cell holdout are reported separately.
+```bash
+cd frontend
+VITE_API_BASE_URL=http://3.109.59.56:8000 npm run build
+aws s3 sync dist/ s3://agrishield-x-907739324681-ap-south-1 --delete
+```
+
+7. Verify auth, protected routes, `/health`, `/benchmark`, `/pso-future/metrics`, `/forecast`, `/map`, `/crops`, and `/advisories`.
+
+## Pull Requests
+
+- PR #1: https://github.com/kingprem12/Agri-Shield/pull/1
+- PR #2: https://github.com/kingprem12/Agri-Shield/pull/2
 
 ## Project Structure
 
 ```text
-backend/          FastAPI API, ETL, ML pipeline, tests
-frontend/         React + Tailwind dashboard
-infrastructure/  Nginx and AWS deployment assets
-scripts/         Local and cloud deployment helpers
-docs/            Architecture, ER, sequence, API, deployment, report
+backend/                 FastAPI API, auth, ML pipeline, scripts, tests
+frontend/                React + Vite dashboard, auth context, pages, tests
+infrastructure/terraform Terraform EC2/S3/IAM/security group definitions
+scripts/                 Secret scan and deployment helpers
+docs/                    Supporting architecture and report notes
+monitoring/              Prometheus/Grafana assets when present
 ```
-
-## Important Deployment Note
-
-The AWS deployment scripts are production-oriented templates. They require your AWS account, IAM permissions, EC2 host, domain name, TLS email, and GitHub secrets before automatic deployment can run.
