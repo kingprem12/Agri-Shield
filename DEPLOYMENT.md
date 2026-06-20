@@ -1,148 +1,78 @@
 # AgriShield-X Deployment
 
-This guide uses local AWS CLI credentials or environment variables. Do not paste secrets into files committed to Git.
-
-## 1. Local Setup
-
-```bash
-python3 --version
-node --version
-aws --version
-terraform version
-```
-
-Backend checks:
+## Local Setup
 
 ```bash
 cd backend
-python3 -m venv .venv
+python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-python -m pytest tests
-python -c "from app.main import app; print(app.title)"
+uvicorn app.main:app --reload
 ```
-
-Frontend checks:
 
 ```bash
 cd frontend
 npm install
-npm test -- --run
-npm run build
+VITE_API_BASE_URL=http://localhost:8000 npm run dev
 ```
 
-Docker Compose check:
+## Secure Environment
 
-```bash
-docker compose config
-```
+Create a local `.env` from `.env.example` and replace placeholders. Do not commit `.env`.
 
-## 2. AWS CLI Setup
+Required production values:
 
-Configure AWS outside the repository:
+- `DATABASE_URL`
+- `JWT_SECRET_KEY`
+- `SEED_ADMIN_EMAIL`
+- `SEED_ADMIN_PASSWORD`
+- `MODEL_PATH`
 
-```bash
-aws configure
-aws sts get-caller-identity
-```
-
-Expected region for this project is `ap-south-1`.
-
-## 3. Terraform Apply
+## Terraform
 
 ```bash
 cd infrastructure/terraform
 cp terraform.tfvars.example terraform.tfvars
-```
-
-Edit `terraform.tfvars` locally:
-
-```hcl
-ssh_allowed_cidr = "YOUR_PUBLIC_IP/32"
-key_name         = "your-existing-ec2-keypair"
-bucket_name      = "globally-unique-s3-bucket-name"
-```
-
-Then run:
-
-```bash
+# set ssh_allowed_cidr to your public IP/32
 terraform init
-terraform fmt
-terraform validate
 terraform plan
 terraform apply
 ```
 
-Useful outputs:
+Outputs include the EC2 public IP, backend URL, S3 frontend URL, and bucket name.
+
+Destroy resources:
 
 ```bash
-terraform output ec2_public_ip
-terraform output backend_url
-terraform output s3_bucket_name
-terraform output s3_website_url
+terraform destroy
 ```
 
-## 4. Backend Deployment
+## Backend Deployment
 
-The backend deployment script clones the selected Git branch onto EC2 and starts PostgreSQL plus FastAPI through Docker Compose.
+Use the existing deployment script or SSH/SSM into the EC2 instance. Preserve environment variables and database volume.
 
 ```bash
-export EC2_HOST="$(terraform -chdir=infrastructure/terraform output -raw ec2_public_ip)"
-export EC2_USER="ec2-user"
-export SSH_KEY_PATH="/path/to/key.pem"
-export REPO_URL="https://github.com/kingprem12/Agri-Shield.git"
-export BRANCH="safe-terraform-deployment"
-export POSTGRES_PASSWORD="replace-locally-only"
-export CORS_ORIGINS='["*"]'
-./scripts/deploy_backend_ec2.sh
+scripts/deploy_backend_ec2.sh
 ```
 
 Verify:
 
 ```bash
-curl "http://${EC2_HOST}:8000/health"
-curl "http://${EC2_HOST}:8000/benchmark"
+curl http://EC2_PUBLIC_IP:8000/health
+curl http://EC2_PUBLIC_IP:8000/pso-future/metrics
 ```
 
-## 5. Frontend Deployment
+## Frontend Deployment
 
 ```bash
-export S3_BUCKET="$(terraform -chdir=infrastructure/terraform output -raw s3_bucket_name)"
-export VITE_API_BASE_URL="http://${EC2_HOST}:8000"
-./scripts/deploy_frontend_s3.sh
-```
-
-Open the S3 website URL from Terraform output.
-
-## 6. Destroy Infrastructure
-
-```bash
-./scripts/destroy_infra.sh
-```
-
-or:
-
-```bash
-cd infrastructure/terraform
-terraform destroy
+cd frontend
+VITE_API_BASE_URL=http://EC2_PUBLIC_IP:8000 npm run build
+aws s3 sync dist/ s3://YOUR_BUCKET --delete
 ```
 
 ## Troubleshooting
 
-- If SSH fails, confirm `ssh_allowed_cidr` matches your current public IP.
-- If the backend does not start on a small EC2 instance, avoid building the frontend Docker image on that host.
-- If S3 returns AccessDenied, confirm website hosting and bucket policy were applied.
-- If CORS fails, set `CORS_ORIGINS` to the frontend website origin and redeploy the backend.
-- If model files are missing, copy trained artifacts to `backend/models/` on the deployment host or mount a persistent model volume.
-
-## Safety Checklist
-
-Before every commit or push:
-
-```bash
-./scripts/check_secrets.sh
-git status
-git diff --cached --stat
-```
-
-Do not commit `.env`, PEM files, Terraform state, local datasets, virtual environments, `node_modules`, or large model artifacts.
+- A `401` response means the route requires login.
+- A `403` response on `/admin/*` means the user is not an ADMIN.
+- If the frontend shows stale routes, clear browser storage and reload.
+- If SSM is unavailable, confirm the EC2 instance profile has `AmazonSSMManagedInstanceCore`.

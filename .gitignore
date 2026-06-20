@@ -1,69 +1,41 @@
 .DS_Store
-
-# Python
 __pycache__/
-*.py[cod]
-*.pyo
+*.pyc
 .pytest_cache/
-.mypy_cache/
-.ruff_cache/
-.coverage
-htmlcov/
 .venv/
-venv/
-env/
-
-# Node / frontend
 node_modules/
-frontend/node_modules/
 dist/
-frontend/dist/
-.vite/
-
-# Local environment and credentials
 .env
-.env.*
+*.env
 !.env.example
 *.pem
 *.key
+*.zip
+.secrets/
+deployment-state/
 credentials
-credentials.*
-secrets.*
-*.secret
-
-# Databases and generated state
 *.sqlite3
-*.db
-
-# Terraform
-.terraform/
-**/.terraform/
-*.tfstate
-*.tfstate.*
+terraform.tfstate
+terraform.tfstate.*
 terraform.tfvars
-*.tfvars
-!terraform.tfvars.example
+.terraform/
 .terraform.lock.hcl
-
-# Data, generated outputs, and large artifacts
+crash.log
+crash.*.log
 Data Sets/
+drive-download-*/
+gee_sindh_exports_extracted/
+outputs/
+*.sqlite3
 backend/data/raw/*
 backend/data/processed/*
-outputs/
-work/
-*.joblib
-*.pt
-*.pth
-*.onnx
-*.h5
-*.pkl
-
-# Keep lightweight placeholders and source-controlled reports only when explicitly unignored.
+backend/models/**/*.joblib
+backend/models/*.joblib
+backend/models/**/*.pt
+backend/models/*.pt
+backend/reports/*.json
+backend/reports/*.png
 !backend/data/raw/.gitkeep
 !backend/data/processed/.gitkeep
 !backend/models/.gitkeep
 !backend/reports/.gitkeep
-!backend/reports/base_paper_text.txt
-!backend/reports/*.json
-!backend/reports/plots/
-!backend/reports/plots/**/*.png

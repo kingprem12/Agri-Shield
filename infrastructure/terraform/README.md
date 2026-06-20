@@ -1,25 +1,24 @@
 # AgriShield-X Terraform
 
-This Terraform stack creates the AWS infrastructure needed for the AgriShield-X prototype:
+This Terraform stack creates the reusable cloud foundation for AgriShield-X:
 
 - EC2 backend host
-- Security group for SSH, HTTP, and FastAPI port `8000`
-- S3 bucket configured for static website hosting
-
-It does not store or require AWS secrets in files. Use your local AWS CLI profile or environment variables.
+- Security group with SSH from one operator CIDR, HTTP, and FastAPI port 8000
+- IAM instance profile with AWS Systems Manager support
+- S3 static website bucket for the React frontend
 
 ## Usage
 
 ```bash
 cd infrastructure/terraform
 cp terraform.tfvars.example terraform.tfvars
-# Edit terraform.tfvars with your SSH CIDR, key pair name, and bucket name.
+# edit terraform.tfvars with your own public IP/CIDR and optional bucket/key names
 terraform init
 terraform plan
 terraform apply
 ```
 
-Destroy resources:
+Destroy resources when finished:
 
 ```bash
 terraform destroy

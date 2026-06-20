@@ -1,4 +1,26 @@
-# No EC2 IAM role is required for the current deployment flow.
-# Backend deployment uses the operator's local AWS CLI configuration and SSH.
-# Add a least-privilege instance profile here only if the backend later needs
-# direct S3/model-bucket access from inside EC2.
+resource "aws_iam_role" "ec2_ssm" {
+  name = "${var.project_name}-ec2-ssm-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Service = "ec2.amazonaws.com"
+      }
+      Action = "sts:AssumeRole"
+    }]
+  })
+
+  tags = local.common_tags
+}
+
+resource "aws_iam_role_policy_attachment" "ssm_managed_instance_core" {
+  role       = aws_iam_role.ec2_ssm.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+resource "aws_iam_instance_profile" "ec2" {
+  name = "${var.project_name}-ec2-instance-profile"
+  role = aws_iam_role.ec2_ssm.name
+}
