@@ -4,7 +4,7 @@ services:
     environment:
       POSTGRES_DB: agrishield
       POSTGRES_USER: agrishield
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-agrishield}
+      POSTGRES_PASSWORD: agrishield
     ports:
       - "5432:5432"
     volumes:
@@ -18,10 +18,9 @@ services:
   backend:
     build: ./backend
     environment:
-      DATABASE_URL: postgresql+psycopg://agrishield:${POSTGRES_PASSWORD:-agrishield}@postgres:5432/agrishield
+      DATABASE_URL: postgresql+psycopg://agrishield:agrishield@postgres:5432/agrishield
       MODEL_PATH: /app/models/best_model.joblib
       ENVIRONMENT: docker
-      CORS_ORIGINS: ${CORS_ORIGINS:-["http://localhost:5173","http://127.0.0.1:5173"]}
     ports:
       - "8000:8000"
     depends_on:
@@ -30,7 +29,6 @@ services:
     volumes:
       - ./backend/models:/app/models
       - ./backend/data:/app/data
-      - ./backend/reports:/app/reports
 
   frontend:
     build: ./frontend

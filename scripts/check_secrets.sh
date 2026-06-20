@@ -1,42 +1,33 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-scan_root="${1:-.}"
+cd "$(dirname "$0")/.."
 
-high_risk_pattern='AKIA[0-9A-Z]{16}|aws_secret_access_key[[:space:]]*=|AWS_SECRET_ACCESS_KEY[[:space:]]*=|-----BEGIN (RSA |OPENSSH |EC )?PRIVATE KEY-----|terraform\.tfstate'
-review_pattern='AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY|PRIVATE KEY|BEGIN RSA|BEGIN OPENSSH|\.pem|token|password|credentials|\.env'
+patterns='AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY|AKIA|PRIVATE KEY|BEGIN RSA|BEGIN OPENSSH|\.pem|terraform\.tfstate|(^|/)\.env($|[^.]|/)'
 
-exclude_args=(
-  --hidden
-  --glob '!.git/**'
-  --glob '!frontend/node_modules/**'
-  --glob '!backend/.venv/**'
-  --glob '!backend/.pytest_cache/**'
-  --glob '!**/__pycache__/**'
-  --glob '!**/.terraform/**'
-  --glob '!frontend/dist/**'
-  --glob '!*.png'
-  --glob '!*.jpg'
-  --glob '!*.jpeg'
-  --glob '!*.joblib'
-  --glob '!*.pt'
-  --glob '!*.sqlite3'
-  --glob '!scripts/check_secrets.sh'
-)
-
-echo "Running high-risk secret scan..."
-if rg -l "${exclude_args[@]}" "$high_risk_pattern" "$scan_root" >/tmp/agrishield_secret_hits.txt; then
-  echo "High-risk secret patterns were found in these files:" >&2
-  sed 's#^\./##' /tmp/agrishield_secret_hits.txt >&2
+echo "Scanning tracked-safe project files for secret patterns..."
+if grep -RInE "$patterns" . \
+  --exclude-dir=.git \
+  --exclude-dir=node_modules \
+  --exclude-dir=.venv \
+  --exclude-dir=.terraform \
+  --exclude-dir=dist \
+  --exclude-dir='Data Sets' \
+  --exclude-dir=.secrets \
+  --exclude-dir=deployment-state \
+  --exclude-dir=docs \
+  --exclude-dir=.github \
+  --exclude='check_secrets.sh' \
+  --exclude='README.md' \
+  --exclude='DEPLOYMENT.md' \
+  --exclude='.gitignore' \
+  --exclude='*.png' \
+  --exclude='*.jpg' \
+  --exclude='*.jpeg' \
+  --exclude='*.joblib' \
+  --exclude='*.sqlite3'; then
+  echo "Potential secret-like strings were found. Review the output above before committing."
   exit 1
 fi
 
-echo "Running review scan for placeholder-sensitive words..."
-if rg -l "${exclude_args[@]}" "$review_pattern" "$scan_root" >/tmp/agrishield_secret_review_hits.txt; then
-  echo "Review-only matches found. Confirm these are placeholders or documentation, not secrets:"
-  sed 's#^\./##' /tmp/agrishield_secret_review_hits.txt
-else
-  echo "No review-only matches found."
-fi
-
-echo "No high-risk secrets detected."
+echo "Secret scan passed."

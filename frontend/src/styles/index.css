@@ -5,12 +5,537 @@
 
 body {
   margin: 0;
-  background: #f8fafc;
+  background: #f7f1df;
   color: #0f172a;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.brand-button {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
 }
 
 .leaflet-container {
   height: 420px;
   border-radius: 1.5rem;
+}
+
+.research-shell {
+  min-height: calc(100vh - 82px);
+  padding: 2rem 1.5rem 3rem;
+  background:
+    radial-gradient(circle at top left, rgba(166, 193, 121, 0.35), transparent 34rem),
+    linear-gradient(135deg, #f7f1df 0%, #eef4df 48%, #dbe8cf 100%);
+}
+
+.research-shell > * {
+  max-width: 1180px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.research-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(260px, 0.6fr);
+  gap: 1.5rem;
+  align-items: stretch;
+  margin-bottom: 1.5rem;
+}
+
+.research-hero h2 {
+  max-width: 760px;
+  margin: 0.35rem 0 0;
+  color: #183d24;
+  font-size: clamp(2rem, 4vw, 4rem);
+  line-height: 1;
+  font-weight: 950;
+}
+
+.research-hero p {
+  max-width: 760px;
+  margin-top: 1rem;
+  color: #4c5f43;
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.research-kicker {
+  width: fit-content;
+  margin: 0;
+  border-radius: 999px;
+  background: rgba(50, 111, 68, 0.12);
+  padding: 0.45rem 0.8rem;
+  color: #326f44;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.research-hero-card,
+.clay-card {
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  border-radius: 1.35rem;
+  background: rgba(255, 252, 239, 0.78);
+  box-shadow:
+    14px 18px 34px rgba(88, 111, 66, 0.16),
+    -10px -10px 24px rgba(255, 255, 255, 0.82),
+    inset 1px 1px 0 rgba(255, 255, 255, 0.75);
+}
+
+.research-hero-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.research-hero-card span {
+  color: #7b5a30;
+  font-size: 0.8rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.research-hero-card strong {
+  margin-top: 0.7rem;
+  color: #183d24;
+  font-size: 1.6rem;
+  line-height: 1.1;
+}
+
+.research-hero-card small {
+  margin-top: 1rem;
+  color: #617256;
+  font-weight: 700;
+}
+
+.research-grid {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.research-grid-four {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.research-two-column {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.clay-card {
+  padding: 1.35rem;
+}
+
+.clay-card h3 {
+  margin: 0 0 0.75rem;
+  color: #1d4028;
+  font-size: 1.2rem;
+  font-weight: 950;
+}
+
+.clay-card p,
+.research-list {
+  color: #536348;
+  line-height: 1.65;
+}
+
+.clay-card-emerald,
+.clay-card-green {
+  background: rgba(241, 249, 232, 0.82);
+}
+
+.clay-card-amber,
+.clay-card-earth {
+  background: rgba(251, 238, 207, 0.82);
+}
+
+.research-card-label {
+  margin: 0;
+  color: #6f7c5f;
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.research-card-value,
+.research-metric {
+  display: block;
+  margin-top: 0.35rem;
+  color: #183d24;
+  font-size: clamp(1.45rem, 2.5vw, 2.3rem);
+  line-height: 1.05;
+}
+
+.research-card-note {
+  display: block;
+  margin-top: 0.55rem;
+  color: #7b5a30;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.research-definition {
+  display: grid;
+  gap: 0.65rem;
+  margin: 0;
+}
+
+.research-definition div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid rgba(92, 111, 77, 0.14);
+  padding-bottom: 0.55rem;
+}
+
+.research-definition dt {
+  color: #6f7c5f;
+  font-weight: 800;
+}
+
+.research-definition dd {
+  margin: 0;
+  color: #183d24;
+  font-weight: 900;
+  text-align: right;
+}
+
+.research-list {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.research-list li + li {
+  margin-top: 0.45rem;
+}
+
+.feature-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.feature-pills span {
+  border-radius: 999px;
+  background: rgba(50, 111, 68, 0.12);
+  padding: 0.55rem 0.8rem;
+  color: #2d633d;
+  font-size: 0.85rem;
+  font-weight: 850;
+}
+
+@media (max-width: 900px) {
+  .research-hero,
+  .research-two-column {
+    grid-template-columns: 1fr;
+  }
+
+  .research-grid-four {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .research-shell {
+    padding: 1.25rem 1rem 2rem;
+  }
+
+  .research-grid-four {
+    grid-template-columns: 1fr;
+  }
+
+  .research-definition div {
+    display: block;
+  }
+
+  .research-definition dd {
+    margin-top: 0.15rem;
+    text-align: left;
+  }
+}
+
+.agri-page {
+  min-height: calc(100vh - 82px);
+  padding: 2rem 1.5rem 3rem;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(105, 142, 82, 0.24), transparent 24rem),
+    radial-gradient(circle at 92% 18%, rgba(163, 119, 67, 0.16), transparent 22rem),
+    linear-gradient(135deg, #f8f1df, #eef5df 48%, #dce9cf);
+}
+
+.agri-page > * {
+  max-width: 1180px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.agri-hero,
+.page-header {
+  margin-bottom: 1.25rem;
+}
+
+.agri-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.agri-hero h2,
+.page-header h2 {
+  margin: 0.4rem 0 0;
+  color: #183d24;
+  font-size: clamp(2rem, 4vw, 4.4rem);
+  font-weight: 950;
+  line-height: 1;
+}
+
+.agri-hero p,
+.page-header p {
+  max-width: 760px;
+  margin-top: 0.9rem;
+  color: #536348;
+  line-height: 1.7;
+}
+
+.agri-kicker {
+  width: fit-content;
+  margin: 0;
+  border-radius: 999px;
+  background: rgba(50, 111, 68, 0.12);
+  padding: 0.45rem 0.8rem;
+  color: #326f44;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.agri-hero-metrics,
+.agri-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.agri-hero-metrics {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.agri-grid {
+  margin-top: 1rem;
+}
+
+.agri-grid.two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.agri-grid.three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.agri-grid.dashboard,
+.agri-grid.map-layout {
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.75fr);
+}
+
+.clay-panel {
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  border-radius: 1.35rem;
+  background: rgba(255, 252, 239, 0.78);
+  box-shadow:
+    14px 18px 34px rgba(88, 111, 66, 0.16),
+    -10px -10px 24px rgba(255, 255, 255, 0.82),
+    inset 1px 1px 0 rgba(255, 255, 255, 0.75);
+  padding: 1.25rem;
+}
+
+.clay-panel h3 {
+  margin: 0 0 0.8rem;
+  color: #1d4028;
+  font-size: 1.2rem;
+  font-weight: 950;
+}
+
+.clay-panel p,
+.clay-panel li {
+  color: #536348;
+  line-height: 1.65;
+}
+
+.metric-tile span,
+.agri-card-label {
+  color: #6f7c5f;
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.metric-tile strong,
+.result-panel strong {
+  display: block;
+  margin-top: 0.35rem;
+  color: #183d24;
+  font-size: clamp(1.8rem, 3vw, 2.8rem);
+  line-height: 1;
+}
+
+.result-panel span {
+  display: block;
+  margin-top: 0.7rem;
+  color: #7b5a30;
+  font-weight: 850;
+}
+
+.input-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.input-grid label {
+  color: #536348;
+  font-size: 0.82rem;
+  font-weight: 850;
+  text-transform: capitalize;
+}
+
+.input-grid input {
+  width: 100%;
+  margin-top: 0.35rem;
+  border: 1px solid rgba(83, 99, 72, 0.18);
+  border-radius: 0.9rem;
+  background: rgba(255, 255, 255, 0.72);
+  padding: 0.72rem 0.8rem;
+  color: #183d24;
+  outline: none;
+}
+
+.agri-button,
+.segmented button {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.85rem 1rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.agri-button {
+  width: 100%;
+  margin-top: 1rem;
+  background: #326f44;
+  color: white;
+}
+
+.sindh-map {
+  position: relative;
+  min-height: 430px;
+  overflow: hidden;
+  background:
+    linear-gradient(145deg, rgba(50, 111, 68, 0.22), rgba(229, 204, 156, 0.42)),
+    rgba(255, 252, 239, 0.7);
+}
+
+.map-cell {
+  position: absolute;
+  border: 2px solid rgba(50, 111, 68, 0.3);
+  border-radius: 1.4rem;
+  background: rgba(255, 255, 255, 0.62);
+  padding: 1rem;
+  color: #183d24;
+  font-weight: 950;
+}
+
+.map-cell.active {
+  background: #326f44;
+  color: white;
+}
+
+.cell-0 { top: 12%; left: 34%; width: 34%; height: 22%; }
+.cell-1 { top: 38%; left: 28%; width: 42%; height: 24%; }
+.cell-2 { top: 66%; left: 36%; width: 32%; height: 22%; }
+
+.sparkline {
+  width: 100%;
+  height: 180px;
+}
+
+.climate-list,
+.feature-rank,
+.crop-list {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.climate-list span,
+.feature-rank span,
+.crop-list div {
+  border-radius: 1rem;
+  background: rgba(50, 111, 68, 0.1);
+  padding: 0.75rem 0.9rem;
+  color: #2d633d;
+  font-weight: 850;
+}
+
+.feature-rank span {
+  display: block;
+}
+
+.crop-list span {
+  display: block;
+  color: #7b5a30;
+  font-weight: 850;
+}
+
+.auth-panel {
+  max-width: 520px;
+}
+
+.segmented {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  border-radius: 999px;
+  background: rgba(50, 111, 68, 0.1);
+  padding: 0.4rem;
+}
+
+.segmented button {
+  background: transparent;
+  color: #326f44;
+}
+
+.segmented button.active {
+  background: #326f44;
+  color: white;
+}
+
+.agri-error {
+  color: #b42318;
+  font-weight: 900;
+}
+
+@media (max-width: 920px) {
+  .agri-hero,
+  .agri-grid.two,
+  .agri-grid.three,
+  .agri-grid.dashboard,
+  .agri-grid.map-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .agri-page {
+    padding: 1.25rem 1rem 2rem;
+  }
+
+  .agri-hero-metrics,
+  .input-grid {
+    grid-template-columns: 1fr;
+  }
 }

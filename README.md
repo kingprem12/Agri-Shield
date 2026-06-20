@@ -1,109 +1,93 @@
 # AgriShield-X
 
-AgriShield-X is a final-year major project for real-time agricultural drought forecasting using remote sensing, deep learning, heuristic optimization, hybrid ensemble learning, and cloud deployment.
+Production-grade research prototype: Real-Time Agricultural Drought Forecasting using Multi-Source Remote Sensing, Deep Learning and Hybrid Ensemble Learning.
 
-The system predicts Vegetation Health Index (VHI) and drought severity from real satellite and climate features including NDVI, LST, rainfall, temperature, humidity, evapotranspiration, soil moisture, VCI, TCI, SPI, SPEI, lags, rolling windows, and wavelet features.
+The repository also keeps the original AgriShield AI drought prediction flow, now extended with AgriShield-X VHI forecasting, Sindh CSV ingestion, wavelet features, baseline and hybrid ensembles, explainability endpoints, Prometheus/Grafana monitoring, and AWS deployment assets.
 
-## Architecture
+Cloud-based agricultural drought prediction and early warning system for a Final Year Engineering Major Project.
 
-```text
-frontend/                 React + Vite dashboard
-backend/                  FastAPI API, ML pipelines, tests, reports
-backend/app/ml/           Feature engineering, deep learning, hybrid models
-backend/scripts/          Training and benchmark scripts
-infrastructure/terraform/ AWS EC2 + S3 infrastructure as code
-scripts/                  Safe deployment and secret-scan helpers
-docs/                     Supporting architecture and research notes
-monitoring/               Prometheus and Grafana configuration
+AgriShield AI predicts agricultural drought severity from satellite vegetation, land-surface temperature, rainfall, and weather features. The project includes automated ETL, wavelet feature engineering, model training, FastAPI inference, a React dashboard, PostgreSQL persistence, Docker, CI, and AWS deployment assets.
+
+## Features
+
+- MODIS NDVI, MODIS LST, CHIRPS rainfall, and NASA POWER weather ETL scripts
+- Monthly aggregation, missing-value cleaning, wavelet transforms, lag features, and rolling averages
+- XGBoost, Random Forest, and Linear Regression training with `TimeSeriesSplit`
+- Best-model selection by RMSE and R², saved with Joblib
+- FastAPI endpoints: `/health`, `/predict`, `/metrics`
+- AgriShield-X endpoints: `/forecast`, `/explain`, `/benchmark`, `/retrain`
+- PostgreSQL-backed prediction history
+- React + Tailwind dashboard with Leaflet India map and Plotly charts
+- Docker Compose for local full-stack execution
+- GitHub Actions validation workflow
+- AWS EC2/S3/Nginx/HTTPS deployment scripts and guide
+- JWT authentication with FARMER and ADMIN roles
+- Protected frontend routes for forecasting, maps, research results, advisories, crop recommendations, and admin analytics
+- Terraform infrastructure for EC2, S3 static hosting, security groups, and SSM instance access
+
+## Authentication and Roles
+
+Unauthenticated users can access only the landing and auth pages. FARMER users can access forecasting, map, history, explainability, crop recommendation, advisory, research, and Sindh PSO pages. ADMIN users can access all FARMER pages plus the admin console.
+
+Public signup always creates a FARMER account. ADMIN accounts are created safely from backend environment variables:
+
+```bash
+SEED_ADMIN_EMAIL=admin@example.com
+SEED_ADMIN_PASSWORD=replace-with-a-strong-password
 ```
 
-## Implemented Models
+Never commit real secrets. Use `.env.example` as the placeholder reference.
 
-- LSTM, CNN-LSTM, BiLSTM, and GRU sequence regressors in PyTorch
-- CNN grid-image model for NDVI/LST/rainfall image-like patches
-- Wavelet + XGBoost
-- ExtraTrees and XGBoost baselines
-- PSO-optimized Wavelet XGBoost
-- Optuna path with random-search fallback
-- Proposed Wavelet + CNN/BiLSTM/GRU embeddings + XGBoost stacking ensemble
-
-Large trained model artifacts are intentionally ignored by Git. Store production model files on the deployment host, an attached volume, or an object store.
-
-## Local Run
-
-Backend:
+## Quick Start
 
 ```bash
 cd backend
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
-python -m pytest tests
+pip install -r requirements-research.txt
+python scripts/run_etl.py --sample
+python scripts/train_model.py
+python scripts/train_agrishield_x.py --limit-files 36
+python scripts/train_deep_hybrid_benchmark.py --dataset-dir "../Data Sets" --limit-files 276 --max-grid-rows 10000 --epochs 8
+python scripts/generate_deep_hybrid_plots.py
 uvicorn app.main:app --reload
 ```
 
-Frontend:
+In another terminal:
 
 ```bash
 cd frontend
 npm install
-npm test -- --run
 npm run dev
 ```
 
 Open `http://localhost:5173`.
 
-## Docker
+## Docker Local Run
 
 ```bash
-cp .env.example .env
 docker compose up --build
 ```
-
-Services:
 
 - Frontend: `http://localhost:5173`
 - Backend API: `http://localhost:8000`
 - API docs: `http://localhost:8000/docs`
 - PostgreSQL: `localhost:5432`
 - Prometheus: `http://localhost:9090`
-- Grafana: `http://localhost:3001`
+- Grafana: `http://localhost:3001` (`admin` / `agrishield`)
 
-## API Endpoints
+## Tests
 
-- `GET /health`
-- `POST /predict`
-- `POST /forecast`
-- `POST /explain`
-- `GET /research-metrics`
-- `GET /benchmark`
-- `POST /retrain`
-- `GET /metrics`
+```bash
+cd backend
+python -m pytest tests
 
-## Benchmark Summary
+cd ../frontend
+npm test -- --run
+npm run build
+```
 
-Base paper metrics:
-
-| Metric | Base paper |
-|---|---:|
-| R2 | 0.964 |
-| RMSE | 0.021 |
-| MAE | 0.023 |
-
-Current best reported results:
-
-| Protocol | Best model | R2 | RMSE | MAE | MAPE |
-|---|---|---:|---:|---:|---:|
-| Strict future forecasting | Proposed Wavelet + CNN/BiLSTM/GRU + XGBoost stacking | 0.8897 | 0.0581 | 0.0473 | 0.1092 |
-| Paper-comparable random split | ExtraTrees random split | 0.6795 | 0.1367 | 0.0957 | 0.7114 |
-| Same-month VHI estimation | Wavelet-XGBoost VHI estimator | 0.9996 | 0.0050 | 0.0038 | 0.0137 |
-| Spatial grid-cell holdout | ExtraTrees unseen-grid holdout | 0.6634 | 0.1434 | 0.1063 | 0.6674 |
-
-Honest conclusion: the project beats the base paper only under same-month VHI estimation/reconstruction. It does not yet beat the base paper under strict future forecasting.
-
-## Terraform Deployment
-
-Terraform lives in `infrastructure/terraform`.
+## Terraform
 
 ```bash
 cd infrastructure/terraform
@@ -111,58 +95,27 @@ cp terraform.tfvars.example terraform.tfvars
 terraform init
 terraform plan
 terraform apply
-```
-
-Required values include:
-
-- `ssh_allowed_cidr`
-- `key_name`
-- optional unique `bucket_name`
-
-Destroy:
-
-```bash
 terraform destroy
 ```
 
-## Safe Deployment Scripts
+Terraform state, local variables, PEM keys, datasets, model artifacts, and `.env` files are ignored and must not be committed.
 
-Backend:
+## Current Research Result
 
-```bash
-export EC2_HOST="<ec2-public-ip>"
-export EC2_USER="ec2-user"
-export SSH_KEY_PATH="/path/to/key.pem"
-export REPO_URL="https://github.com/kingprem12/Agri-Shield.git"
-export BRANCH="safe-terraform-deployment"
-export POSTGRES_PASSWORD="<local-secret-value>"
-./scripts/deploy_backend_ec2.sh
+The latest deep-hybrid benchmark is saved at `backend/reports/deep_hybrid_benchmark.json`.
+
+Honest conclusion: the current best result beats the base paper metrics only under same-month VHI estimation, not strict future forecasting. Strict future forecasting, random split, same-month estimation, and spatial grid-cell holdout are reported separately.
+
+## Project Structure
+
+```text
+backend/          FastAPI API, ETL, ML pipeline, tests
+frontend/         React + Tailwind dashboard
+infrastructure/  Nginx and AWS deployment assets
+scripts/         Local and cloud deployment helpers
+docs/            Architecture, ER, sequence, API, deployment, report
 ```
 
-Frontend:
+## Important Deployment Note
 
-```bash
-export S3_BUCKET="<terraform-output-bucket>"
-export VITE_API_BASE_URL="http://<ec2-public-ip>:8000"
-./scripts/deploy_frontend_s3.sh
-```
-
-Secret scan:
-
-```bash
-./scripts/check_secrets.sh
-```
-
-## Secret Handling
-
-Never commit:
-
-- `.env` or `.env.*`
-- AWS keys
-- PEM/private keys
-- Terraform state or `terraform.tfvars`
-- credentials files
-- `node_modules`, virtual environments, caches, or generated build folders
-- large datasets and large model artifacts
-
-Use `.env.example` and `terraform.tfvars.example` only for safe placeholders.
+The AWS deployment scripts are production-oriented templates. They require your AWS account, IAM permissions, EC2 host, domain name, TLS email, and GitHub secrets before automatic deployment can run.

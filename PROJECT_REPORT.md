@@ -1,54 +1,23 @@
 # AgriShield-X Project Report
 
-## Title
+AgriShield-X is a final-year major project for strict next-month agricultural drought forecasting over Sindh using Google Earth Engine satellite and climate data.
 
-AgriShield-X: Real-Time Agricultural Drought Forecasting using Deep Learning, Heuristic Optimization, Remote Sensing and Cloud Deployment.
+## Final Production Candidate
 
-## Objective
+- Model: PSO-Optimized LightGBM / enriched future forecasting ensemble candidate
+- Target: `vhi_next_month`
+- Forecasting mode: strict chronological next-month forecasting
+- Dataset: 1,361,299 rows, 4,937 grid cells, 2001-2023
+- Current strict metrics: R2 0.8153, RMSE 0.1097, MAE 0.0839, F1 0.6354
 
-Build a deployable drought forecasting system that predicts VHI and drought severity using real remote-sensing and climate datasets, with honest evaluation across forecasting, estimation, random split, and spatial holdout protocols.
+## System
 
-## Data and Features
+- Frontend: React + Vite agriculture dashboard
+- Backend: FastAPI
+- Auth: JWT access tokens, refresh tokens, FARMER and ADMIN roles
+- Cloud: AWS EC2 backend, S3 frontend, Terraform infrastructure
+- ML assets: preserved locally and excluded from Git when too large
 
-The project uses local real monthly grid-cell drought data derived from remote sensing and climate variables. Feature engineering includes NDVI, LST, rainfall, temperature, humidity, evapotranspiration, soil moisture, VCI, TCI, VHI, SPI, SPEI, month and season encodings, lag features, rolling means, and wavelet decomposition features.
+## Research Honesty
 
-## Models
-
-- LSTM
-- CNN-LSTM
-- BiLSTM
-- GRU
-- CNN grid-image model
-- Wavelet + XGBoost
-- PSO-optimized Wavelet XGBoost
-- Wavelet + CNN/BiLSTM/GRU + XGBoost stacking ensemble
-
-## Evaluation Protocols
-
-| Protocol | Description |
-|---|---|
-| A | Strict chronological next-month forecasting |
-| B | Paper-comparable random split |
-| C | Same-month VHI estimation/reconstruction |
-| D | Spatial grid-cell holdout |
-
-## Results
-
-| Protocol | Best model | R2 | RMSE | MAE | MAPE |
-|---|---|---:|---:|---:|---:|
-| Strict future forecasting | Proposed Wavelet + CNN/BiLSTM/GRU + XGBoost stacking | 0.8897 | 0.0581 | 0.0473 | 0.1092 |
-| Paper-comparable random split | ExtraTrees random split | 0.6795 | 0.1367 | 0.0957 | 0.7114 |
-| Same-month estimation | Wavelet-XGBoost VHI estimator | 0.9996 | 0.0050 | 0.0038 | 0.0137 |
-| Spatial holdout | ExtraTrees unseen-grid holdout | 0.6634 | 0.1434 | 0.1063 | 0.6674 |
-
-Base paper metrics are R2 `0.964`, RMSE `0.021`, and MAE `0.023`.
-
-## Honest Conclusion
-
-The project beats the base paper only under same-month VHI estimation/reconstruction. The strict future forecasting model is strong but does not yet beat the base paper metrics. This distinction must be preserved in reports, demos, and presentations.
-
-## Recommended Next Work
-
-1. Add longer time-series coverage from Google Earth Engine.
-2. Add Sentinel-2 image patches and a CNN/ConvLSTM branch.
-3. Add attention-based LSTM or a compact Transformer tuned with Optuna or PSO under chronological validation.
+The main claim is strict next-month forecasting. Same-month estimation is reported separately and is not used as the future-forecasting result.
