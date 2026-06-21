@@ -15,7 +15,7 @@ import {
   LandingPage
 } from "./pages/ProductionSuite.jsx";
 import BenchmarkPanel from "./components/BenchmarkPanel.jsx";
-import { useAuth } from "./context/AuthContext.jsx";
+import { normalizeRole, useAuth } from "./context/AuthContext.jsx";
 import { fetchHistory, logoutSession } from "./services/api.js";
 
 const pages = {
@@ -71,6 +71,22 @@ function pageFromPath() {
   return pages[window.location.pathname] || "dashboard";
 }
 
+function pathForPage(nextPage) {
+  return Object.entries(pages).find(([, value]) => value === nextPage)?.[0] || "/";
+}
+
+function redirectTarget() {
+  const target = new URLSearchParams(window.location.search).get("redirect");
+  return target && target.startsWith("/") ? target : "";
+}
+
+function pageIsAllowedForRole(page, role) {
+  const normalized = normalizeRole(role);
+  if (publicPages.has(page)) return true;
+  if (normalized === "ADMIN") return farmerPages.has(page) || adminPages.has(page);
+  return farmerPages.has(page);
+}
+
 export default function App() {
   const [page, setPage] = useState(pageFromPath());
   const [history, setHistory] = useState([]);
@@ -92,14 +108,26 @@ export default function App() {
   }, [auth.isAuthenticated]);
 
   function navigate(nextPage) {
-    const path = Object.entries(pages).find(([, value]) => value === nextPage)?.[0] || "/";
+    const path = pathForPage(nextPage);
     window.history.pushState({}, "", path);
-    setPage(nextPage);
+    setPage(pageFromPath());
+  }
+
+  function navigateToPath(path) {
+    window.history.pushState({}, "", path);
+    setPage(pageFromPath());
   }
 
   function handleAuth(session) {
     auth.persistSession(session);
-    navigate(session.user?.role === "ADMIN" ? "admin" : "forecast-dashboard");
+    const role = normalizeRole(session.role || session.user?.role);
+    const requestedPath = redirectTarget();
+    const requestedPage = requestedPath ? pages[new URL(requestedPath, window.location.origin).pathname] : "";
+    if (requestedPage && pageIsAllowedForRole(requestedPage, role)) {
+      navigateToPath(pathForPage(requestedPage));
+      return;
+    }
+    navigate(role === "ADMIN" ? "admin" : "forecast-dashboard");
   }
 
   async function handleLogout() {
@@ -114,7 +142,7 @@ export default function App() {
   }
 
   const visibleNav = useMemo(() => {
-    if (!auth.isAuthenticated) return ["dashboard", "auth"];
+    if (!auth.isAuthenticated) return ["dashboard", "forecast-dashboard", "admin", "auth"];
     const base = ["dashboard", ...farmerPages];
     return auth.isAdmin ? [...base, "admin"] : base;
   }, [auth.isAuthenticated, auth.isAdmin]);
@@ -123,8 +151,15 @@ export default function App() {
   const effectivePage = blockedPage || page;
 
   useEffect(() => {
-    if (!auth.loading && blockedPage === "auth") navigate("auth");
-    if (!auth.loading && blockedPage === "unauthorized") navigate("unauthorized");
+    if (!auth.loading && blockedPage === "auth") {
+      const target = encodeURIComponent(window.location.pathname);
+      window.history.replaceState({}, "", `/auth?redirect=${target}`);
+      setPage("auth");
+    }
+    if (!auth.loading && blockedPage === "unauthorized") {
+      window.history.replaceState({}, "", "/unauthorized");
+      setPage("unauthorized");
+    }
   }, [auth.loading, blockedPage]);
 
   return (

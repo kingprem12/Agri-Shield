@@ -20,6 +20,7 @@ if grep -RInE "$patterns" . \
   --exclude='check_secrets.sh' \
   --exclude='README.md' \
   --exclude='DEPLOYMENT.md' \
+  --exclude='DEPLOYMENT_READINESS_REPORT.md' \
   --exclude='.gitignore' \
   --exclude='*.png' \
   --exclude='*.jpg' \

@@ -15,6 +15,8 @@ class Settings(BaseSettings):
     refresh_token_days: int = Field(default=7, alias="REFRESH_TOKEN_DAYS")
     seed_admin_email: str = Field(default="", alias="SEED_ADMIN_EMAIL")
     seed_admin_password: str = Field(default="", alias="SEED_ADMIN_PASSWORD")
+    seed_farmer_email: str = Field(default="", alias="SEED_FARMER_EMAIL")
+    seed_farmer_password: str = Field(default="", alias="SEED_FARMER_PASSWORD")
     model_path: Path = Field(default=Path("models/best_model.joblib"), alias="MODEL_PATH")
     data_dir: Path = Path("data")
     cors_origins: list[str] = [

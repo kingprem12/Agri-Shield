@@ -19,29 +19,34 @@ def ensure_lightweight_schema_updates() -> None:
             connection.execute(text("ALTER TABLE prediction_history ADD COLUMN suitable_crops VARCHAR(300) DEFAULT ''"))
 
 
-def seed_admin_user() -> None:
-    if not settings.seed_admin_email or not settings.seed_admin_password:
+def seed_user(email: str, password: str, role: str, full_name: str) -> None:
+    if not email or not password:
         return
     with SessionLocal() as db:
-        existing = db.query(User).filter(User.email == settings.seed_admin_email.lower()).first()
+        existing = db.query(User).filter(User.email == email.lower()).first()
         if existing:
             return
-        admin = User(
-            email=settings.seed_admin_email.lower(),
-            full_name="AgriShield Admin",
-            role="ADMIN",
-            password_hash=hash_password(settings.seed_admin_password),
+        user = User(
+            email=email.lower(),
+            full_name=full_name,
+            role=role,
+            password_hash=hash_password(password),
             email_verified=True,
         )
-        db.add(admin)
-        db.add(SystemLog(level="info", event="admin_seeded", message="Admin account created from environment seed variables."))
+        db.add(user)
+        db.add(SystemLog(level="info", event="user_seeded", message=f"{role} account created from environment seed variables."))
         db.commit()
+
+
+def seed_demo_users() -> None:
+    seed_user(settings.seed_admin_email, settings.seed_admin_password, "ADMIN", "AgriShield Admin")
+    seed_user(settings.seed_farmer_email, settings.seed_farmer_password, "FARMER", "AgriShield Farmer")
 
 
 def create_app() -> FastAPI:
     Base.metadata.create_all(bind=engine)
     ensure_lightweight_schema_updates()
-    seed_admin_user()
+    seed_demo_users()
     app = FastAPI(
         title=settings.app_name,
         description="Agricultural drought prediction and early warning API",
