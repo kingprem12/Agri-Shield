@@ -165,7 +165,7 @@ export async function fetchProfile(token) {
 
 export async function fetchAdminAnalytics(token) {
   const response = await fetch(`${API_BASE_URL}/admin/analytics`, {
-    headers: { Authorization: `Bearer ${token}` }
+    headers: authHeaders(token)
   });
   if (!response.ok) throw new Error(`Admin analytics failed: ${response.status}`);
   return response.json();
@@ -173,9 +173,33 @@ export async function fetchAdminAnalytics(token) {
 
 export async function fetchAdminUsers(token) {
   const response = await fetch(`${API_BASE_URL}/admin/users`, {
-    headers: { Authorization: `Bearer ${token}` }
+    headers: authHeaders(token)
   });
   if (!response.ok) throw new Error(`Admin users failed: ${response.status}`);
+  return response.json();
+}
+
+export async function fetchAdminModels(token) {
+  const response = await fetch(`${API_BASE_URL}/admin/models`, {
+    headers: authHeaders(token)
+  });
+  if (!response.ok) throw new Error(`Admin models failed: ${response.status}`);
+  return response.json();
+}
+
+export async function fetchAdminDatasets(token) {
+  const response = await fetch(`${API_BASE_URL}/admin/datasets`, {
+    headers: authHeaders(token)
+  });
+  if (!response.ok) throw new Error(`Admin datasets failed: ${response.status}`);
+  return response.json();
+}
+
+export async function fetchAdminLogs(token) {
+  const response = await fetch(`${API_BASE_URL}/admin/logs`, {
+    headers: authHeaders(token)
+  });
+  if (!response.ok) throw new Error(`Admin logs failed: ${response.status}`);
   return response.json();
 }
 

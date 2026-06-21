@@ -41,6 +41,21 @@ export function AuthProvider({ children }) {
     setUser(normalizedUser);
   }
 
+  async function completeLogin(session) {
+    if (!session?.access_token) {
+      throw new Error("Invalid login response");
+    }
+    localStorage.setItem(ACCESS_KEY, session.access_token);
+    if (session.refresh_token) {
+      localStorage.setItem(REFRESH_KEY, session.refresh_token);
+      setRefreshToken(session.refresh_token);
+    }
+    setAccessToken(session.access_token);
+    const profile = normalizeUser(await fetchProfile(session.access_token));
+    setUser(profile);
+    return profile;
+  }
+
   function clearSession() {
     localStorage.removeItem(ACCESS_KEY);
     localStorage.removeItem(REFRESH_KEY);
@@ -84,6 +99,7 @@ export function AuthProvider({ children }) {
       isAuthenticated: Boolean(user && accessToken),
       isAdmin: normalizeRole(user?.role) === "ADMIN",
       persistSession,
+      completeLogin,
       clearSession
     }),
     [user, accessToken, refreshToken, loading]

@@ -9,20 +9,20 @@ const fallbackResults = {
   date_range: "2001-01 to 2023-12",
   region: "Sindh",
   target: "vhi_next_month",
-  model: "PSO-Optimized ExtraTrees + XGBoost Ensemble",
-  r2: 0.802,
-  rmse: 0.1151,
-  mae: 0.089,
-  f1: 0.6306,
+  model: "PSO-Optimized LightGBM Strict Future Forecaster",
+  r2: 0.8153,
+  rmse: 0.1097,
+  mae: 0.0839,
+  f1: 0.6354,
   top_features: [
-    "month_sin",
-    "season_cos",
-    "solar_radiation",
-    "temperature_roll_3",
-    "vci_roll_12",
-    "vhi_roll_12",
-    "latitude",
-    "solar_radiation_roll_3"
+    "modis_ndvi__t-0",
+    "vci_lag_1__t-0",
+    "evi__t-0",
+    "vhi_wavelet_approx__t-10",
+    "spei_6__t-0",
+    "vhi_lag_12__t-11",
+    "spei_12__t-0",
+    "solar_radiation__t-0"
   ],
   honesty_note:
     "This is strict next-month forecasting using real GEE data. Same-month estimation is reported separately and is not used as the main future forecasting claim."
@@ -69,7 +69,7 @@ export default function ResearchResults() {
           <h2>Strict Future Drought Forecasting for Sindh</h2>
           <p>
             AgriShield-X predicts next-month VHI with enriched Google Earth Engine climate and vegetation features,
-            using a PSO-optimized ExtraTrees and XGBoost ensemble.
+            using a PSO-optimized LightGBM strict forecasting model.
           </p>
         </div>
         <div className="research-hero-card">
