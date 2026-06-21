@@ -1,133 +1,170 @@
 import React, { useEffect, useMemo, useState } from "react";
-import Dashboard from "./pages/Dashboard.jsx";
-import Analytics from "./pages/Analytics.jsx";
 import SindhPso from "./pages/SindhPso.jsx";
 import ResearchResults from "./pages/ResearchResults.jsx";
 import {
-  AdminPage,
+  AdminAnalyticsPage,
+  AdminDashboardPage,
+  AdminDatasetsPage,
+  AdminLogsPage,
+  AdminModelsPage,
+  AdminProfilePage,
+  AdminSettingsPage,
+  AdminUsersPage,
   AuthPage,
   CropRecommendationPage,
-  ExplainabilityPage,
   FarmerAdvisoryPage,
-  ForecastDashboard,
-  HistoricalAnalysis,
+  FarmerDashboard,
+  FarmerHistoryPage,
+  FarmerProfilePage,
+  FarmerSettingsPage,
+  ForecastPage,
+  HelpPage,
   InteractiveMapPage,
   LandingPage
 } from "./pages/ProductionSuite.jsx";
-import BenchmarkPanel from "./components/BenchmarkPanel.jsx";
 import { normalizeRole, useAuth } from "./context/AuthContext.jsx";
-import { fetchHistory, logoutSession } from "./services/api.js";
+import { logoutSession } from "./services/api.js";
 
-const pages = {
-  "/": "dashboard",
-  "/auth": "auth",
-  "/login": "auth",
-  "/signup": "auth",
-  "/classic-dashboard": "classic-dashboard",
-  "/analytics": "analytics",
-  "/benchmark": "benchmark",
-  "/sindh-pso": "sindh-pso",
-  "/research-results": "research-results",
-  "/forecast-dashboard": "forecast-dashboard",
-  "/interactive-map": "interactive-map",
-  "/historical-analysis": "historical-analysis",
-  "/explainability": "explainability",
-  "/crop-recommendation": "crop-recommendation",
-  "/farmer-advisory": "farmer-advisory",
-  "/admin": "admin",
-  "/unauthorized": "unauthorized"
+const routeConfig = {
+  "/": { page: "home", public: true },
+  "/auth": { page: "farmer-login", public: true },
+  "/auth/farmer": { page: "farmer-login", public: true },
+  "/auth/admin": { page: "admin-login", public: true },
+  "/login": { page: "farmer-login", public: true },
+  "/signup": { page: "signup", public: true },
+  "/help": { page: "help", public: true },
+
+  "/dashboard": { page: "farmer-dashboard", roles: ["FARMER"] },
+  "/forecast": { page: "forecast", roles: ["FARMER"] },
+  "/map": { page: "map", roles: ["FARMER"] },
+  "/crops": { page: "crops", roles: ["FARMER"] },
+  "/advisories": { page: "advisories", roles: ["FARMER"] },
+  "/history": { page: "history", roles: ["FARMER"] },
+  "/profile": { page: "profile", roles: ["FARMER"] },
+  "/settings": { page: "settings", roles: ["FARMER"] },
+  "/research-results": { page: "research-results", roles: ["FARMER"] },
+  "/sindh-pso": { page: "sindh-pso", roles: ["FARMER"] },
+
+  "/admin": { page: "admin-dashboard", roles: ["ADMIN"] },
+  "/admin/users": { page: "admin-users", roles: ["ADMIN"] },
+  "/admin/analytics": { page: "admin-analytics", roles: ["ADMIN"] },
+  "/admin/models": { page: "admin-models", roles: ["ADMIN"] },
+  "/admin/datasets": { page: "admin-datasets", roles: ["ADMIN"] },
+  "/admin/logs": { page: "admin-logs", roles: ["ADMIN"] },
+  "/admin/profile": { page: "admin-profile", roles: ["ADMIN"] },
+  "/admin/settings": { page: "admin-settings", roles: ["ADMIN"] },
+  "/unauthorized": { page: "unauthorized", roles: ["FARMER", "ADMIN"] },
+
+  "/forecast-dashboard": { redirect: "/dashboard" },
+  "/interactive-map": { redirect: "/map" },
+  "/historical-analysis": { redirect: "/history" },
+  "/crop-recommendation": { redirect: "/crops" },
+  "/farmer-advisory": { redirect: "/advisories" }
 };
 
-const publicPages = new Set(["dashboard", "auth"]);
-const adminPages = new Set(["admin"]);
-const farmerPages = new Set([
-  "forecast-dashboard",
-  "interactive-map",
-  "historical-analysis",
-  "explainability",
-  "crop-recommendation",
-  "farmer-advisory",
-  "research-results",
-  "sindh-pso",
-  "classic-dashboard",
-  "analytics",
-  "benchmark"
-]);
+const publicNav = [
+  ["/", "Home"],
+  ["/auth/farmer", "Farmer Login"],
+  ["/auth/admin", "Admin Login"],
+  ["/help", "Help"]
+];
 
-const labels = {
-  dashboard: "Home",
-  "forecast-dashboard": "Forecast",
-  "interactive-map": "Map",
-  "historical-analysis": "History",
-  explainability: "Explainability",
-  "crop-recommendation": "Crops",
-  "farmer-advisory": "Advisory",
-  "research-results": "Research Results",
-  "sindh-pso": "Sindh PSO Model",
-  admin: "Admin"
-};
+const farmerNav = [
+  ["/dashboard", "Dashboard"],
+  ["/forecast", "Forecast"],
+  ["/map", "Map"],
+  ["/crops", "Crops"],
+  ["/advisories", "Advisory"],
+  ["/history", "History"],
+  ["/research-results", "Research"],
+  ["/help", "Help"],
+  ["/profile", "Profile"]
+];
 
-function pageFromPath() {
-  return pages[window.location.pathname] || "dashboard";
+const adminNav = [
+  ["/admin", "Admin Dashboard"],
+  ["/admin/users", "Users"],
+  ["/admin/analytics", "Analytics"],
+  ["/admin/models", "Models"],
+  ["/admin/datasets", "Datasets"],
+  ["/admin/logs", "Logs"],
+  ["/admin/profile", "Profile"]
+];
+
+function currentPath() {
+  return window.location.pathname || "/";
 }
 
-function pathForPage(nextPage) {
-  return Object.entries(pages).find(([, value]) => value === nextPage)?.[0] || "/";
-}
-
-function redirectTarget() {
+function redirectQuery() {
   const target = new URLSearchParams(window.location.search).get("redirect");
   return target && target.startsWith("/") ? target : "";
 }
 
-function pageIsAllowedForRole(page, role) {
+function loginPathFor(path) {
+  return path.startsWith("/admin") ? "/auth/admin" : "/auth/farmer";
+}
+
+function configForPath(path) {
+  return routeConfig[path] || routeConfig["/"];
+}
+
+function roleAllowed(config, role) {
+  if (config.public) return true;
   const normalized = normalizeRole(role);
-  if (publicPages.has(page)) return true;
-  if (normalized === "ADMIN") return farmerPages.has(page) || adminPages.has(page);
-  return farmerPages.has(page);
+  if (normalized === "ADMIN") return config.roles?.includes("ADMIN");
+  return config.roles?.includes("FARMER") && !config.roles?.includes("ADMIN");
 }
 
 export default function App() {
-  const [page, setPage] = useState(pageFromPath());
-  const [history, setHistory] = useState([]);
   const auth = useAuth();
-
-  async function refreshHistory() {
-    if (!auth.isAuthenticated) return;
-    setHistory(await fetchHistory());
-  }
+  const [path, setPath] = useState(currentPath());
 
   useEffect(() => {
-    const syncPage = () => setPage(pageFromPath());
-    window.addEventListener("popstate", syncPage);
-    return () => window.removeEventListener("popstate", syncPage);
+    const sync = () => setPath(currentPath());
+    window.addEventListener("popstate", sync);
+    return () => window.removeEventListener("popstate", sync);
   }, []);
 
+  const config = configForPath(path);
+
   useEffect(() => {
-    refreshHistory();
-  }, [auth.isAuthenticated]);
+    if (config.redirect) {
+      navigateTo(config.redirect, true);
+    }
+  }, [config.redirect]);
 
-  function navigate(nextPage) {
-    const path = pathForPage(nextPage);
-    window.history.pushState({}, "", path);
-    setPage(pageFromPath());
-  }
-
-  function navigateToPath(path) {
-    window.history.pushState({}, "", path);
-    setPage(pageFromPath());
-  }
-
-  function handleAuth(session) {
-    auth.persistSession(session);
-    const role = normalizeRole(session.role || session.user?.role);
-    const requestedPath = redirectTarget();
-    const requestedPage = requestedPath ? pages[new URL(requestedPath, window.location.origin).pathname] : "";
-    if (requestedPage && pageIsAllowedForRole(requestedPage, role)) {
-      navigateToPath(pathForPage(requestedPage));
+  useEffect(() => {
+    if (auth.loading || config.public || config.redirect) return;
+    if (!auth.isAuthenticated) {
+      navigateTo(`${loginPathFor(path)}?redirect=${encodeURIComponent(path)}`, true);
       return;
     }
-    navigate(role === "ADMIN" ? "admin" : "forecast-dashboard");
+    if (!roleAllowed(config, auth.user?.role)) {
+      navigateTo("/unauthorized", true);
+    }
+  }, [auth.loading, auth.isAuthenticated, auth.user?.role, path]);
+
+  function navigateTo(nextPath, replace = false) {
+    if (replace) {
+      window.history.replaceState({}, "", nextPath);
+    } else {
+      window.history.pushState({}, "", nextPath);
+    }
+    setPath(currentPath());
+  }
+
+  async function handleAuth(session, loginKind = "farmer") {
+    const profile = await auth.completeLogin(session);
+    const role = normalizeRole(profile?.role);
+    const requested = redirectQuery();
+    if (requested) {
+      const requestedConfig = configForPath(requested);
+      if (!requestedConfig.public && roleAllowed(requestedConfig, role)) {
+        navigateTo(requested, true);
+        return;
+      }
+    }
+    navigateTo(role === "ADMIN" ? "/admin" : "/dashboard", true);
   }
 
   async function handleLogout() {
@@ -137,49 +174,36 @@ export default function App() {
       }
     } finally {
       auth.clearSession();
-      navigate("auth");
+      navigateTo("/auth/farmer", true);
     }
   }
 
-  const visibleNav = useMemo(() => {
-    if (!auth.isAuthenticated) return ["dashboard", "forecast-dashboard", "admin", "auth"];
-    const base = ["dashboard", ...farmerPages];
-    return auth.isAdmin ? [...base, "admin"] : base;
+  const navItems = useMemo(() => {
+    if (!auth.isAuthenticated) return publicNav;
+    return auth.isAdmin ? adminNav : farmerNav;
   }, [auth.isAuthenticated, auth.isAdmin]);
 
-  const blockedPage = resolveBlockedPage(page, auth);
-  const effectivePage = blockedPage || page;
-
-  useEffect(() => {
-    if (!auth.loading && blockedPage === "auth") {
-      const target = encodeURIComponent(window.location.pathname);
-      window.history.replaceState({}, "", `/auth?redirect=${target}`);
-      setPage("auth");
-    }
-    if (!auth.loading && blockedPage === "unauthorized") {
-      window.history.replaceState({}, "", "/unauthorized");
-      setPage("unauthorized");
-    }
-  }, [auth.loading, blockedPage]);
+  const effectiveConfig = configForPath(path);
+  const effectivePage = effectiveConfig.page || "home";
 
   return (
     <main className="min-h-screen">
       <nav className="border-b border-emerald-100 bg-[#fbf8ef]/90 backdrop-blur">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-4 lg:flex-row lg:items-center lg:justify-between">
-          <button className="brand-button" onClick={() => navigate("dashboard")}>
+          <button className="brand-button" onClick={() => navigateTo(auth.isAuthenticated ? (auth.isAdmin ? "/admin" : "/dashboard") : "/")}>
             <p className="text-sm font-semibold text-emerald-700">AgriShield-X</p>
-            <h1 className="text-xl font-bold text-stone-950">Agricultural Drought Early Warning</h1>
+            <h1 className="text-xl font-bold text-stone-950">Farmer Drought Intelligence Platform</h1>
           </button>
           <div className="flex flex-wrap items-center gap-2">
-            {visibleNav.map((item) => (
+            {navItems.map(([href, label]) => (
               <button
-                key={item}
-                onClick={() => navigate(item)}
+                key={href}
+                onClick={() => navigateTo(href)}
                 className={`rounded-full px-4 py-2 text-sm font-semibold ${
-                  effectivePage === item ? "bg-emerald-700 text-white" : "bg-white/70 text-stone-700 shadow-sm"
+                  path === href ? "bg-emerald-700 text-white" : "bg-white/70 text-stone-700 shadow-sm"
                 }`}
               >
-                {labels[item] || "Login"}
+                {label}
               </button>
             ))}
             {auth.isAuthenticated && (
@@ -190,39 +214,37 @@ export default function App() {
           </div>
         </div>
       </nav>
-      {auth.loading ? <LoadingScreen /> : renderPage(effectivePage, { history, refreshHistory, handleAuth, auth })}
+      {auth.loading ? <LoadingScreen /> : renderPage(effectivePage, { auth, handleAuth })}
     </main>
   );
 }
 
-function resolveBlockedPage(page, auth) {
-  if (auth.loading || publicPages.has(page)) return null;
-  if (!auth.isAuthenticated) return "auth";
-  if (adminPages.has(page) && !auth.isAdmin) return "unauthorized";
-  if (farmerPages.has(page) || adminPages.has(page)) return null;
-  return null;
-}
-
 function renderPage(page, props) {
-  if (page === "dashboard") return <LandingPage />;
-  if (page === "auth") return <AuthPage onAuth={props.handleAuth} />;
-  if (page === "unauthorized") return <UnauthorizedPage user={props.auth.user} />;
-  if (page === "classic-dashboard") return <Dashboard history={props.history} onPrediction={props.refreshHistory} />;
-  if (page === "forecast-dashboard") return <ForecastDashboard />;
-  if (page === "interactive-map") return <InteractiveMapPage />;
-  if (page === "historical-analysis") return <HistoricalAnalysis />;
-  if (page === "explainability") return <ExplainabilityPage />;
-  if (page === "crop-recommendation") return <CropRecommendationPage />;
-  if (page === "farmer-advisory") return <FarmerAdvisoryPage />;
-  if (page === "admin") return <AdminPage />;
-  if (page === "analytics") return <Analytics history={props.history} />;
-  if (page === "sindh-pso") return <SindhPso />;
+  if (page === "home") return <LandingPage />;
+  if (page === "farmer-login") return <AuthPage mode="login" loginKind="farmer" title="Farmer Login" onAuth={props.handleAuth} />;
+  if (page === "admin-login") return <AuthPage mode="login" loginKind="admin" title="Admin Login" onAuth={props.handleAuth} />;
+  if (page === "signup") return <AuthPage mode="signup" loginKind="farmer" title="Farmer Signup" onAuth={props.handleAuth} />;
+  if (page === "help") return <HelpPage />;
+  if (page === "farmer-dashboard") return <FarmerDashboard user={props.auth.user} />;
+  if (page === "forecast") return <ForecastPage />;
+  if (page === "map") return <InteractiveMapPage />;
+  if (page === "crops") return <CropRecommendationPage />;
+  if (page === "advisories") return <FarmerAdvisoryPage />;
+  if (page === "history") return <FarmerHistoryPage />;
+  if (page === "profile") return <FarmerProfilePage user={props.auth.user} />;
+  if (page === "settings") return <FarmerSettingsPage />;
   if (page === "research-results") return <ResearchResults />;
-  return (
-    <div className="mx-auto max-w-7xl px-6 py-8">
-      <BenchmarkPanel />
-    </div>
-  );
+  if (page === "sindh-pso") return <SindhPso />;
+  if (page === "admin-dashboard") return <AdminDashboardPage />;
+  if (page === "admin-users") return <AdminUsersPage />;
+  if (page === "admin-analytics") return <AdminAnalyticsPage />;
+  if (page === "admin-models") return <AdminModelsPage />;
+  if (page === "admin-datasets") return <AdminDatasetsPage />;
+  if (page === "admin-logs") return <AdminLogsPage />;
+  if (page === "admin-profile") return <AdminProfilePage user={props.auth.user} />;
+  if (page === "admin-settings") return <AdminSettingsPage />;
+  if (page === "unauthorized") return <UnauthorizedPage user={props.auth.user} />;
+  return <LandingPage />;
 }
 
 function LoadingScreen() {
@@ -240,9 +262,9 @@ function UnauthorizedPage({ user }) {
   return (
     <div className="agri-page">
       <section className="clay-panel">
-        <p className="agri-kicker">Access denied</p>
-        <h2>Admin authorization required</h2>
-        <p>{user?.email || "This account"} can use farmer forecasting pages, but cannot open the admin console.</p>
+        <p className="agri-kicker">403 Unauthorized</p>
+        <h2>Access denied</h2>
+        <p>{user?.email || "This account"} does not have permission to open that page.</p>
       </section>
     </div>
   );

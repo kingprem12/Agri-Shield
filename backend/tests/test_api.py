@@ -119,6 +119,10 @@ def test_admin_can_access_admin_analytics():
     assert response.status_code == 200
     assert "total_users" in response.json()
 
+    assert client.get("/admin/models", headers={"Authorization": f"Bearer {token}"}).status_code == 200
+    assert client.get("/admin/datasets", headers={"Authorization": f"Bearer {token}"}).status_code == 200
+    assert client.get("/admin/logs", headers={"Authorization": f"Bearer {token}"}).status_code == 200
+
 
 def test_profile_normalizes_user_role_to_farmer():
     with SessionLocal() as db:
@@ -163,6 +167,11 @@ def test_protected_forecast_requires_login():
     )
     assert response.status_code == 401
 
+    assert client.get("/forecast").status_code == 401
+    assert client.get("/map").status_code == 401
+    assert client.get("/crops").status_code == 401
+    assert client.get("/advisories").status_code == 401
+
 
 def test_research_results_endpoint_returns_final_metrics():
     client = TestClient(app)
@@ -173,7 +182,7 @@ def test_research_results_endpoint_returns_final_metrics():
     assert body["target"] == "vhi_next_month"
     assert body["dataset_rows"] == 1361299
     assert body["grid_cells"] == 4937
-    assert body["r2"] == 0.8020
-    assert body["rmse"] == 0.1151
-    assert body["mae"] == 0.0890
-    assert body["f1"] == 0.6306
+    assert body["r2"] == 0.8153
+    assert body["rmse"] == 0.1097
+    assert body["mae"] == 0.0839
+    assert body["f1"] == 0.6354

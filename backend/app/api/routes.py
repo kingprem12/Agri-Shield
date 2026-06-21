@@ -149,6 +149,17 @@ def forecast(request: ForecastRequest, _: User = Depends(current_user)) -> Forec
     return ForecastResponse(**result)
 
 
+@router.get("/forecast")
+def forecast_status(_: User = Depends(current_user)) -> dict:
+    return {
+        "model": "PSO-Optimized LightGBM",
+        "forecasting_type": "Strict next-month forecasting",
+        "target": "vhi_next_month",
+        "metrics": {"r2": 0.8153, "rmse": 0.1097, "mae": 0.0839, "f1": 0.6354},
+        "status": "ready",
+    }
+
+
 @router.get("/map")
 def map_cells(_: User = Depends(current_user)) -> dict:
     return {
@@ -158,6 +169,29 @@ def map_cells(_: User = Depends(current_user)) -> dict:
             {"grid_id": "sindh-central", "latitude": 26.1, "longitude": 68.3, "severity": "Mild Drought", "risk_score": 43, "climate_indicators": {"rainfall": 22, "temperature": 37, "solar_radiation": 24.1}},
             {"grid_id": "sindh-south", "latitude": 24.9, "longitude": 67.6, "severity": "Severe Drought", "risk_score": 71, "climate_indicators": {"rainfall": 8, "temperature": 41, "solar_radiation": 27.3}},
         ],
+    }
+
+
+@router.post("/map")
+def map_cell_lookup(payload: dict, _: User = Depends(current_user)) -> dict:
+    latitude = float(payload.get("latitude", 26.1))
+    longitude = float(payload.get("longitude", 68.3))
+    return {
+        "grid_id": payload.get("grid_id", "sindh-selected"),
+        "latitude": latitude,
+        "longitude": longitude,
+        "severity": "Moderate Drought",
+        "risk_score": 58,
+        "reason": "Rainfall deficit, high temperature, and vegetation stress increase next-month drought risk.",
+    }
+
+
+@router.get("/crops")
+def crop_status(_: User = Depends(current_user)) -> dict:
+    return {
+        "status": "ready",
+        "inputs": ["drought_severity", "temperature", "rainfall", "soil_type"],
+        "recommended_for": "Sindh drought-aware crop planning",
     }
 
 
@@ -173,6 +207,14 @@ def crop_recommendations(payload: dict, _: User = Depends(current_user)) -> dict
         {"crop": "Mung bean", "suitability_score": 74 if drought_hardy else 84, "water_requirement": "Medium", "reason": "Short growing cycle and useful soil nitrogen contribution."},
     ]
     return {"recommendations": crops, "inputs": {"drought_severity": severity, "temperature": temperature, "rainfall": rainfall}}
+
+
+@router.get("/advisories")
+def advisory_status(_: User = Depends(current_user)) -> dict:
+    return {
+        "status": "ready",
+        "topics": ["irrigation advice", "risk warnings", "drought mitigation"],
+    }
 
 
 @router.post("/advisories")
@@ -206,6 +248,52 @@ def admin_analytics(db: Session = Depends(get_db), _: User = Depends(admin_user)
         "forecast_usage": forecasts,
         "model_metrics": load_future_report(_pso_future_paths()[1]).get("protocols", {}),
         "system_logs": [{"level": log.level, "event": log.event, "message": log.message, "created_at": log.created_at.isoformat()} for log in logs],
+    }
+
+
+@router.get("/admin/models")
+def admin_models(_: User = Depends(admin_user)) -> dict:
+    report = load_future_report(_pso_future_paths()[1])
+    strict = report.get("protocols", {}).get("A_strict_chronological_next_month_forecasting", {})
+    return {
+        "model": "PSO-Optimized LightGBM",
+        "forecasting_type": "Strict next-month forecasting",
+        "version": "v1.0",
+        "last_trained": "2026-06 placeholder",
+        "r2": round(float(strict.get("r2", 0.8153)), 4),
+        "rmse": round(float(strict.get("rmse", 0.1097)), 4),
+        "mae": round(float(strict.get("mae", 0.0839)), 4),
+        "f1": round(float(strict.get("drought_severity_f1", 0.6354)), 4),
+        "top_features": [item.get("feature") for item in report.get("top_features", [])[:8]] or [
+            "modis_ndvi__t-0",
+            "vci_lag_1__t-0",
+            "evi__t-0",
+            "spei_6__t-0",
+        ],
+    }
+
+
+@router.get("/admin/datasets")
+def admin_datasets(_: User = Depends(admin_user)) -> dict:
+    return {
+        "rows": 1361299,
+        "grid_cells": 4937,
+        "date_range": "2001-2023",
+        "sources": ["Google Earth Engine", "MODIS", "CHIRPS", "ERA5", "SPI", "SPEI"],
+        "health": "Ready",
+        "target": "vhi_next_month",
+    }
+
+
+@router.get("/admin/logs")
+def admin_logs(db: Session = Depends(get_db), _: User = Depends(admin_user)) -> dict:
+    logs = db.query(SystemLog).order_by(SystemLog.created_at.desc()).limit(50).all()
+    return {
+        "logs": [
+            {"level": log.level, "event": log.event, "message": log.message, "created_at": log.created_at.isoformat()}
+            for log in logs
+        ],
+        "placeholders": ["login logs", "forecast logs", "API health logs"],
     }
 
 
@@ -271,20 +359,20 @@ def research_results() -> dict:
         "date_range": "2001-01 to 2023-12",
         "region": "Sindh",
         "target": "vhi_next_month",
-        "model": "PSO-Optimized ExtraTrees + XGBoost Ensemble",
-        "r2": 0.8020,
-        "rmse": 0.1151,
-        "mae": 0.0890,
-        "f1": 0.6306,
+        "model": "PSO-Optimized LightGBM Strict Future Forecaster",
+        "r2": 0.8153,
+        "rmse": 0.1097,
+        "mae": 0.0839,
+        "f1": 0.6354,
         "top_features": [
-            "month_sin",
-            "season_cos",
-            "solar_radiation",
-            "temperature_roll_3",
-            "vci_roll_12",
-            "vhi_roll_12",
-            "latitude",
-            "solar_radiation_roll_3",
+            "modis_ndvi__t-0",
+            "vci_lag_1__t-0",
+            "evi__t-0",
+            "vhi_wavelet_approx__t-10",
+            "spei_6__t-0",
+            "vhi_lag_12__t-11",
+            "spei_12__t-0",
+            "solar_radiation__t-0",
         ],
         "honesty_note": "This is strict next-month forecasting using real GEE data. Same-month estimation is reported separately and is not used as the main future forecasting claim.",
     }

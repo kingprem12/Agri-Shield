@@ -338,6 +338,10 @@ body {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.agri-grid.four {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
 .agri-grid.dashboard,
 .agri-grid.map-layout {
   grid-template-columns: minmax(0, 1fr) minmax(320px, 0.75fr);
@@ -430,6 +434,30 @@ body {
   color: white;
 }
 
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.2rem;
+}
+
+.hero-actions a,
+.shortcut-card {
+  text-decoration: none;
+}
+
+.hero-actions a {
+  border-radius: 999px;
+  background: #2E7D32;
+  color: white;
+  padding: 0.85rem 1rem;
+  font-weight: 900;
+}
+
+.hero-actions a + a {
+  background: #8B5E34;
+}
+
 .sindh-map {
   position: relative;
   min-height: 430px;
@@ -519,12 +547,89 @@ body {
   font-weight: 900;
 }
 
+.success-note {
+  color: #2E7D32;
+  font-weight: 900;
+}
+
+.muted-note {
+  color: #6f7c5f;
+  font-size: 0.9rem;
+}
+
+.profile-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.profile-photo {
+  display: grid;
+  width: 96px;
+  height: 96px;
+  place-items: center;
+  border-radius: 1.4rem;
+  background: rgba(46, 125, 50, 0.12);
+  color: #14532D;
+  font-weight: 900;
+  text-align: center;
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.profile-grid label,
+.clay-panel > label {
+  color: #536348;
+  font-size: 0.82rem;
+  font-weight: 850;
+  text-transform: capitalize;
+}
+
+.profile-grid input,
+.clay-panel > label input {
+  width: 100%;
+  margin-top: 0.35rem;
+  border: 1px solid rgba(83, 99, 72, 0.18);
+  border-radius: 0.9rem;
+  background: rgba(255, 255, 255, 0.72);
+  padding: 0.72rem 0.8rem;
+  color: #183d24;
+  outline: none;
+}
+
+.table-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.table-list div {
+  display: grid;
+  gap: 0.2rem;
+  border-radius: 1rem;
+  background: rgba(46, 125, 50, 0.08);
+  padding: 0.85rem 1rem;
+}
+
+.table-list span,
+.table-list small {
+  color: #6f7c5f;
+}
+
 @media (max-width: 920px) {
   .agri-hero,
   .agri-grid.two,
   .agri-grid.three,
+  .agri-grid.four,
   .agri-grid.dashboard,
-  .agri-grid.map-layout {
+  .agri-grid.map-layout,
+  .profile-grid {
     grid-template-columns: 1fr;
   }
 }
