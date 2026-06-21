@@ -18,6 +18,8 @@ def signup_and_login(client: TestClient, email: str = "farmer@test.local") -> st
     )
     response = client.post("/auth/login", json={"email": email, "password": "password123"})
     assert response.status_code == 200
+    assert response.json()["role"] == "FARMER"
+    assert response.json()["user"]["role"] == "FARMER"
     return response.json()["access_token"]
 
 
@@ -110,10 +112,35 @@ def test_admin_can_access_admin_analytics():
     email = create_admin()
     login_response = client.post("/auth/login", json={"email": email, "password": "password123"})
     assert login_response.status_code == 200
+    assert login_response.json()["role"] == "ADMIN"
+    assert login_response.json()["user"]["role"] == "ADMIN"
     token = login_response.json()["access_token"]
     response = client.get("/admin/analytics", headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 200
     assert "total_users" in response.json()
+
+
+def test_profile_normalizes_user_role_to_farmer():
+    with SessionLocal() as db:
+        email = "legacy-user@test.local"
+        if not db.query(User).filter(User.email == email).first():
+            db.add(
+                User(
+                    email=email,
+                    full_name="Legacy User",
+                    role="USER",
+                    password_hash=hash_password("password123"),
+                    email_verified=True,
+                )
+            )
+            db.commit()
+    client = TestClient(app)
+    login_response = client.post("/auth/login", json={"email": "legacy-user@test.local", "password": "password123"})
+    assert login_response.status_code == 200
+    assert login_response.json()["role"] == "FARMER"
+    profile = client.get("/auth/profile", headers={"Authorization": f"Bearer {login_response.json()['access_token']}"})
+    assert profile.status_code == 200
+    assert profile.json()["role"] == "FARMER"
 
 
 def test_protected_forecast_requires_login():

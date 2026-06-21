@@ -15,7 +15,7 @@ from app.db.session import get_db
 from app.schemas.prediction import PredictionRecord, PredictionRequest, PredictionResponse
 from app.schemas.x_forecast import ForecastRequest, ForecastResponse, RetrainRequest
 from app.services.predictor import DroughtPredictor
-from app.services.auth import admin_user, create_access_token, create_refresh_token, current_user, hash_password, public_user, token_hash, verify_password
+from app.services.auth import admin_user, create_access_token, create_refresh_token, current_user, hash_password, normalize_role, public_user, token_hash, verify_password
 from app.services.x_predictor import AgriShieldXPredictor
 from app.ml.x_train import train_agrishield_x
 from app.ml.pso_future import load_future_artifact, load_future_report, predict_future_from_payload
@@ -73,7 +73,7 @@ def auth_login(payload: dict, db: Session = Depends(get_db)) -> dict:
     refresh_token = create_refresh_token(db, user)
     db.add(SystemLog(level="info", event="user_login", message=f"User logged in: {email}"))
     db.commit()
-    return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer", "user": public_user(user)}
+    return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer", "role": normalize_role(user.role), "user": public_user(user)}
 
 
 @router.post("/auth/logout")
@@ -96,7 +96,7 @@ def auth_refresh(payload: dict, db: Session = Depends(get_db)) -> dict:
     user = db.get(User, token.user_id)
     if not user or not user.is_active:
         raise HTTPException(status_code=401, detail="Inactive or missing user")
-    return {"access_token": create_access_token(user), "token_type": "bearer", "user": public_user(user)}
+    return {"access_token": create_access_token(user), "token_type": "bearer", "role": normalize_role(user.role), "user": public_user(user)}
 
 
 @router.get("/auth/profile")

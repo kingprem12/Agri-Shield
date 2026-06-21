@@ -20,6 +20,15 @@ from app.db.session import get_db
 settings = get_settings()
 
 
+def normalize_role(role: str | None) -> str:
+    value = str(role or "FARMER").strip().upper()
+    if value == "USER":
+        return "FARMER"
+    if value not in {"ADMIN", "FARMER"}:
+        return "FARMER"
+    return value
+
+
 def hash_password(password: str) -> str:
     salt = os.urandom(16)
     digest = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, 260_000)
@@ -48,7 +57,7 @@ def create_access_token(user: User) -> str:
     payload = {
         "sub": str(user.id),
         "email": user.email,
-        "role": user.role,
+        "role": normalize_role(user.role),
         "iat": int(now.timestamp()),
         "exp": int((now + timedelta(minutes=settings.access_token_minutes)).timestamp()),
         "type": "access",
@@ -90,7 +99,7 @@ def current_user(authorization: Optional[str] = Header(default=None), db: Sessio
 
 
 def admin_user(user: User = Depends(current_user)) -> User:
-    if user.role != "ADMIN":
+    if normalize_role(user.role) != "ADMIN":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin role required")
     return user
 
@@ -100,7 +109,7 @@ def public_user(user: User) -> dict:
         "id": user.id,
         "email": user.email,
         "full_name": user.full_name,
-        "role": user.role,
+        "role": normalize_role(user.role),
         "is_active": user.is_active,
         "email_verified": user.email_verified,
         "created_at": user.created_at.isoformat(),
