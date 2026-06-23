@@ -72,8 +72,11 @@ export default function SindhPso() {
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-6 py-8">
       <section className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-        <p className="text-sm font-bold uppercase tracking-wide text-emerald-700">Sindh PSO Drought Intelligence</p>
-        <h2 className="mt-2 text-3xl font-black text-slate-950">PSO-Optimized Wavelet-XGBoost</h2>
+        <div className="flex flex-wrap items-center gap-3">
+          <p className="text-sm font-bold uppercase tracking-wide text-emerald-700">Research Lab</p>
+          <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-black uppercase tracking-wide text-amber-800">Research Only</span>
+        </div>
+        <h2 className="mt-2 text-3xl font-black text-slate-950">Sindh PSO Research Models</h2>
         <p className="mt-3 max-w-3xl text-slate-600">
           Dedicated Sindh agricultural drought model using GEE remote sensing time-series features, causal lag and rolling windows,
           wavelet decomposition, and Particle Swarm Optimization for XGBoost hyperparameters and feature subset selection.

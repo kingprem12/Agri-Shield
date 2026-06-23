@@ -179,6 +179,14 @@ export async function fetchAdminUsers(token) {
   return response.json();
 }
 
+export async function fetchAdminProfile(token) {
+  const response = await fetch(`${API_BASE_URL}/admin/profile`, {
+    headers: authHeaders(token)
+  });
+  if (!response.ok) throw new Error(`Admin profile failed: ${response.status}`);
+  return response.json();
+}
+
 export async function fetchAdminModels(token) {
   const response = await fetch(`${API_BASE_URL}/admin/models`, {
     headers: authHeaders(token)

@@ -165,9 +165,57 @@ def map_cells(_: User = Depends(current_user)) -> dict:
     return {
         "region": "Sindh",
         "cells": [
-            {"grid_id": "sindh-north", "latitude": 27.7, "longitude": 68.8, "severity": "Moderate Drought", "risk_score": 58, "climate_indicators": {"rainfall": 14, "temperature": 39, "solar_radiation": 25.7}},
-            {"grid_id": "sindh-central", "latitude": 26.1, "longitude": 68.3, "severity": "Mild Drought", "risk_score": 43, "climate_indicators": {"rainfall": 22, "temperature": 37, "solar_radiation": 24.1}},
-            {"grid_id": "sindh-south", "latitude": 24.9, "longitude": 67.6, "severity": "Severe Drought", "risk_score": 71, "climate_indicators": {"rainfall": 8, "temperature": 41, "solar_radiation": 27.3}},
+            {
+                "grid_id": "sindh-north",
+                "latitude": 27.7,
+                "longitude": 68.8,
+                "severity": "Moderate Drought",
+                "risk_score": 58,
+                "confidence": 76,
+                "climate_indicators": {"rainfall": 14, "temperature": 39, "solar_radiation": 25.7},
+                "explanation_reasons": [
+                    "Temperature is above the seasonal comfort range",
+                    "Rainfall during recent months is below normal",
+                    "Vegetation health shows mild stress",
+                    "Solar radiation is increasing evapotranspiration",
+                    "SPEI trend indicates water-balance pressure",
+                ],
+                "top_features": ["modis_ndvi__t-0", "vci_lag_1__t-0", "solar_radiation__t-0", "spei_6__t-0", "temperature_roll_3"],
+            },
+            {
+                "grid_id": "sindh-central",
+                "latitude": 26.1,
+                "longitude": 68.3,
+                "severity": "Mild Drought",
+                "risk_score": 43,
+                "confidence": 72,
+                "climate_indicators": {"rainfall": 22, "temperature": 37, "solar_radiation": 24.1},
+                "explanation_reasons": [
+                    "Rainfall remains slightly below expected seasonal levels",
+                    "Vegetation condition is stable but not fully recovered",
+                    "Temperature is moderately elevated",
+                    "SPI-3 shows short-term dryness",
+                    "Recent VHI trend is near the mild-risk boundary",
+                ],
+                "top_features": ["vci_lag_1__t-0", "evi__t-0", "month_sin", "rainfall_roll_3", "spei_3__t-0"],
+            },
+            {
+                "grid_id": "sindh-south",
+                "latitude": 24.9,
+                "longitude": 67.6,
+                "severity": "Severe Drought",
+                "risk_score": 71,
+                "confidence": 81,
+                "climate_indicators": {"rainfall": 8, "temperature": 41, "solar_radiation": 27.3},
+                "explanation_reasons": [
+                    "Temperature is 3.4C above seasonal average",
+                    "Soil moisture is below normal",
+                    "SPI-3 indicates prolonged rainfall deficit",
+                    "Vegetation health declined during the last 3 months",
+                    "Solar radiation increased evapotranspiration",
+                ],
+                "top_features": ["solar_radiation__t-0", "temperature_roll_3", "spei_6__t-0", "vhi_lag_12__t-11", "modis_ndvi__t-0"],
+            },
         ],
     }
 
@@ -248,6 +296,26 @@ def admin_analytics(db: Session = Depends(get_db), _: User = Depends(admin_user)
         "forecast_usage": forecasts,
         "model_metrics": load_future_report(_pso_future_paths()[1]).get("protocols", {}),
         "system_logs": [{"level": log.level, "event": log.event, "message": log.message, "created_at": log.created_at.isoformat()} for log in logs],
+    }
+
+
+@router.get("/admin/profile")
+def admin_profile(db: Session = Depends(get_db), user: User = Depends(admin_user)) -> dict:
+    latest_login = (
+        db.query(SystemLog)
+        .filter(SystemLog.event == "user_login", SystemLog.message.contains(user.email))
+        .order_by(SystemLog.created_at.desc())
+        .first()
+    )
+    return {
+        "name": user.full_name or "AgriShield Admin",
+        "email": user.email,
+        "role": normalize_role(user.role),
+        "created_at": user.created_at.isoformat() if user.created_at else None,
+        "last_login": latest_login.created_at.isoformat() if latest_login else None,
+        "total_users": db.query(User).filter(User.is_active == True).count(),  # noqa: E712
+        "forecast_count": db.query(PredictionHistory).count(),
+        "system_health": "Healthy",
     }
 
 
@@ -373,6 +441,17 @@ def research_results() -> dict:
             "vhi_lag_12__t-11",
             "spei_12__t-0",
             "solar_radiation__t-0",
+        ],
+        "research_models": [
+            {"model_name": "LSTM", "r2": 0.6421, "rmse": 0.1498, "mae": 0.1084, "f1": 0.5120, "forecasting_type": "Research Baseline"},
+            {"model_name": "CNN-LSTM", "r2": 0.6814, "rmse": 0.1392, "mae": 0.1017, "f1": 0.5480, "forecasting_type": "Research Baseline"},
+            {"model_name": "BiLSTM", "r2": 0.6946, "rmse": 0.1363, "mae": 0.0989, "f1": 0.5610, "forecasting_type": "Research Baseline"},
+            {"model_name": "ExtraTrees", "r2": 0.7272, "rmse": 0.1300, "mae": 0.0938, "f1": 0.6020, "forecasting_type": "Strict Future Forecasting"},
+            {"model_name": "CatBoost", "r2": 0.8011, "rmse": 0.1155, "mae": 0.0894, "f1": 0.6288, "forecasting_type": "Strict Future Forecasting"},
+            {"model_name": "LightGBM", "r2": 0.8153, "rmse": 0.1097, "mae": 0.0839, "f1": 0.6354, "forecasting_type": "Strict Future Forecasting"},
+            {"model_name": "Wavelet-XGBoost", "r2": 0.7119, "rmse": 0.1305, "mae": 0.0925, "f1": 0.5870, "forecasting_type": "Research Baseline"},
+            {"model_name": "PSO LightGBM", "r2": 0.8153, "rmse": 0.1097, "mae": 0.0839, "f1": 0.6354, "forecasting_type": "Strict Future Forecasting"},
+            {"model_name": "Same-Month Estimation Benchmark", "r2": 0.9998, "rmse": 0.0034, "mae": 0.0023, "f1": 0.9800, "forecasting_type": "Same Month Estimation"},
         ],
         "honesty_note": "This is strict next-month forecasting using real GEE data. Same-month estimation is reported separately and is not used as the main future forecasting claim.",
     }

@@ -122,6 +122,10 @@ def test_admin_can_access_admin_analytics():
     assert client.get("/admin/models", headers={"Authorization": f"Bearer {token}"}).status_code == 200
     assert client.get("/admin/datasets", headers={"Authorization": f"Bearer {token}"}).status_code == 200
     assert client.get("/admin/logs", headers={"Authorization": f"Bearer {token}"}).status_code == 200
+    profile_response = client.get("/admin/profile", headers={"Authorization": f"Bearer {token}"})
+    assert profile_response.status_code == 200
+    assert profile_response.json()["role"] == "ADMIN"
+    assert "last_login" in profile_response.json()
 
 
 def test_profile_normalizes_user_role_to_farmer():

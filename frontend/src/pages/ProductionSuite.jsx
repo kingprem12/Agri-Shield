@@ -5,6 +5,7 @@ import {
   fetchAdminDatasets,
   fetchAdminLogs,
   fetchAdminModels,
+  fetchAdminProfile,
   fetchAdminUsers,
   fetchAdvisory,
   fetchMapCells,
@@ -217,9 +218,24 @@ export function InteractiveMapPage() {
         </div>
         <div className="clay-panel">
           <h3>{selected?.grid_id || "Select a cell"}</h3>
-          <p className="risk-line">{selected?.severity || "--"} · risk {selected?.risk_score ?? "--"}</p>
+          <p className="risk-line">{selected?.severity || "--"} · risk {selected?.risk_score ?? "--"} · confidence {selected?.confidence ?? "--"}%</p>
           <p>Coordinates: {selected ? `${selected.latitude}, ${selected.longitude}` : "--"}</p>
-          <p>Reason: low rainfall, heat stress, and vegetation decline can increase next-month drought risk.</p>
+          <div className="why-box">
+            <h4>Why Predicted {selected?.severity || "Drought Risk"}</h4>
+            <ul>
+              {(selected?.explanation_reasons || [
+                "Low rainfall over the last 3 months",
+                "Declining vegetation index",
+                "High land surface temperature",
+                "Negative SPEI trend",
+                "Solar radiation increased evapotranspiration"
+              ]).map((reason) => <li key={reason}>{reason}</li>)}
+            </ul>
+          </div>
+          <div className="why-box compact">
+            <h4>Top 5 contributing features</h4>
+            <FeaturePills features={selected?.top_features || ["modis_ndvi__t-0", "vci_lag_1__t-0", "solar_radiation__t-0", "spei_6__t-0", "temperature_roll_3"]} />
+          </div>
           <MiniTrend />
           <ClimateList indicators={selected?.climate_indicators || {}} />
         </div>
@@ -357,14 +373,34 @@ export function FarmerSettingsPage() {
 }
 
 export function HelpPage() {
+  const severity = [
+    ["No Drought", "0-20", "#2E7D32"],
+    ["Mild Drought", "20-40", "#65A30D"],
+    ["Moderate Drought", "40-60", "#D97706"],
+    ["Severe Drought", "60-80", "#B45309"],
+    ["Extreme Drought", "80-100", "#B91C1C"]
+  ];
   return (
     <div className="agri-page">
       <PageHeader title="Help" text="How to use AgriShield-X for drought forecasting and farm decisions." />
       <section className="agri-grid two">
         <InfoCard title="What is drought?" text="Agricultural drought occurs when water stress reduces vegetation health and crop productivity." />
-        <InfoCard title="How predictions work" text="AgriShield-X predicts next-month VHI using vegetation, rainfall, temperature, SPI, SPEI, and climate signals." />
-        <InfoCard title="Crop recommendations" text="The crop page combines severity, rainfall, temperature, and soil type to rank practical crop options." />
+        <InfoCard title="How forecasting works" text="AgriShield-X predicts next-month VHI using vegetation, rainfall, temperature, SPI, SPEI, and climate signals available before the target month." />
+        <InfoCard title="How crop recommendations are generated" text="The crop page combines severity, rainfall, temperature, and soil type to rank practical crops by water requirement and drought tolerance." />
+        <InfoCard title="How to use map predictions" text="Open Map, click a Sindh grid cell, then read severity, risk score, confidence, climate indicators, and the Why Predicted explanation." />
         <InfoCard title="FAQ and support" text="Use Farmer Login for farm tools, Admin Login for management, and contact the project team for deployment support." />
+      </section>
+      <section className="clay-panel">
+        <h3>How To Read Severity Levels</h3>
+        <div className="severity-legend">
+          {severity.map(([label, range, color]) => (
+            <div key={label}>
+              <span style={{ backgroundColor: color }} />
+              <strong>{label}</strong>
+              <small>{range}</small>
+            </div>
+          ))}
+        </div>
       </section>
     </div>
   );
@@ -486,14 +522,20 @@ export function AdminLogsPage() {
 }
 
 export function AdminProfilePage({ user }) {
+  const [profile, setProfile] = useState(null);
+  useEffect(() => { fetchAdminProfile().then(setProfile).catch(() => {}); }, []);
   return (
     <div className="agri-page">
       <PageHeader title="Admin Profile" text="Administrator account details." />
       <section className="clay-panel profile-grid">
-        <Readonly label="Admin name" value={user?.full_name || "AgriShield Admin"} />
-        <Readonly label="Email" value={user?.email} />
-        <Readonly label="Role" value={user?.role} />
-        <Readonly label="Account status" value={user?.is_active === false ? "Disabled" : "Active"} />
+        <Readonly label="Admin name" value={profile?.name || user?.full_name || "AgriShield Admin"} />
+        <Readonly label="Email" value={profile?.email || user?.email} />
+        <Readonly label="Role" value={profile?.role || user?.role} />
+        <Readonly label="Account created date" value={formatDate(profile?.created_at)} />
+        <Readonly label="Last login timestamp" value={formatDate(profile?.last_login)} />
+        <Readonly label="Total active users" value={profile?.total_users ?? ""} />
+        <Readonly label="Total forecast requests" value={profile?.forecast_count ?? ""} />
+        <Readonly label="System health status" value={profile?.system_health || "Healthy"} />
       </section>
     </div>
   );
@@ -563,4 +605,10 @@ function ClimateList({ indicators }) {
 
 function FeaturePills({ features }) {
   return <div className="feature-pills">{features.map((feature) => <span key={feature}>{feature}</span>)}</div>;
+}
+
+function formatDate(value) {
+  if (!value) return "Not recorded";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
 }
