@@ -10,6 +10,7 @@ vi.mock("../src/services/api.js", () => ({
   fetchAdminDatasets: vi.fn().mockResolvedValue({ rows: 1361299, grid_cells: 4937, date_range: "2001-2023" }),
   fetchAdminLogs: vi.fn().mockResolvedValue({ logs: [] }),
   fetchAdminModels: vi.fn().mockResolvedValue({ model: "PSO-Optimized LightGBM", r2: 0.8153, rmse: 0.1097, mae: 0.0839, f1: 0.6354 }),
+  fetchAdminProfile: vi.fn().mockResolvedValue({ name: "AgriShield Admin", email: "admin@test.local", role: "ADMIN", total_users: 2, forecast_count: 4, system_health: "Healthy" }),
   fetchAdminUsers: vi.fn().mockResolvedValue({ users: [{ id: 1, email: "admin@test.local", role: "ADMIN", is_active: true }] }),
   fetchAdvisory: vi.fn().mockResolvedValue({ irrigation_advice: "Irrigate carefully.", risk_warnings: [], mitigation_tips: [] }),
   fetchMapCells: vi.fn().mockResolvedValue({ cells: [] }),

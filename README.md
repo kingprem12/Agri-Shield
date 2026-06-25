@@ -42,28 +42,37 @@ Public routes:
 
 - `/`
 - `/auth`
+- `/auth/farmer`
+- `/auth/admin`
 - `/login`
 - `/signup`
+- `/help`
 
 Authenticated FARMER routes:
 
-- `/forecast-dashboard`
-- `/interactive-map`
-- `/historical-analysis`
-- `/explainability`
-- `/crop-recommendation`
-- `/farmer-advisory`
+- `/dashboard`
+- `/forecast`
+- `/map`
+- `/crops`
+- `/advisories`
+- `/history`
+- `/profile`
+- `/settings`
 - `/research-results`
 - `/sindh-pso`
-- `/classic-dashboard`
-- `/analytics`
-- `/benchmark`
 
-ADMIN route:
+ADMIN routes:
 
 - `/admin`
+- `/admin/users`
+- `/admin/analytics`
+- `/admin/models`
+- `/admin/datasets`
+- `/admin/logs`
+- `/admin/profile`
+- `/admin/settings`
 
-Unauthenticated users are redirected to `/auth` when opening protected pages. FARMER users cannot access `/admin`. ADMIN users can access all FARMER pages plus the admin console.
+Unauthenticated users are redirected to `/auth/farmer` for farmer pages and `/auth/admin` for admin pages. FARMER users cannot access `/admin` routes. ADMIN users can access the admin console.
 
 ## Backend API Routes
 

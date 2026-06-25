@@ -77,6 +77,7 @@ const farmerNav = [
   ["/advisories", "Advisory"],
   ["/history", "History"],
   ["/research-results", "Research"],
+  ["/sindh-pso", "Research Lab"],
   ["/help", "Help"],
   ["/profile", "Profile"]
 ];
